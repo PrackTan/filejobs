@@ -67,7 +67,17 @@ export class UserService {
     }
     return new ResponseDto(200, 'User found', user);
   }
+  async findOneByEmail(email: string) { // Phương thức tìm một người dùng theo id
 
+    const user = await this.userModel.findOne({email:email});
+    if(!user){
+      return new ResponseDto(404, 'User not found', null);
+    }
+    return new ResponseDto(200, 'User found', user);
+  }
+  async isValidUserpassword(password:string, hash:string){
+    return bcrypt.compareSync(password,hash)
+  }
   async update(updateUserDto: UpdateUserDto) { // Phương thức cập nhật người dùng theo id
     if(!mongoose.Types.ObjectId.isValid(updateUserDto._id)){
       return new ResponseDto(400, 'Invalid id', null);

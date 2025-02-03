@@ -8,5 +8,6 @@ import { UserSchema } from './schemas/user.schema'; // Import UserSchema từ fi
   imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }])], // Đăng ký mô hình User với MongooseModule
   controllers: [UserController], // Đăng ký UserController
   providers: [UserService], // Đăng ký UserService
+  exports:[UserService]
 })
 export class UserModule {} // Định nghĩa UserModule
