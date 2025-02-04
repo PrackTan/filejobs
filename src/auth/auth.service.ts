@@ -8,7 +8,7 @@ export class AuthService {
     async validateUser(username: string, pass: string): Promise<any> {
         const user = await this.userService.findOneByEmail(username);
         if(user){
-            const isValid =  await this.userService.isValidUserpassword(pass,user.data.password)
+            const isValid =  await this.userService.isValidUserpassword(pass,user.password)
             if(isValid === true){
                 return new ResponseDto(200, 'Is valid password', user);
             }
@@ -16,8 +16,8 @@ export class AuthService {
             return new ResponseDto(400, 'user does not already exists', null);
 
         }
-        if (user && user.data.password === pass) {
-          const { password, ...result } = user.data;
+        if (user && user.password === pass) {
+          const { password, ...result } = user;
           return result;
         }
         return null;

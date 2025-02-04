@@ -71,9 +71,9 @@ export class UserService {
 
     const user = await this.userModel.findOne({email:email});
     if(!user){
-      return new ResponseDto(404, 'User not found', null);
+      return null
     }
-    return new ResponseDto(200, 'User found', user);
+    return user;
   }
   async isValidUserpassword(password:string, hash:string){
     return bcrypt.compareSync(password,hash)
