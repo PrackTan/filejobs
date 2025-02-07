@@ -4,7 +4,7 @@ export type UserDocument = HydratedDocument<User>;
 
 /// schema no-sql 
 /// entity sql
-@Schema()
+@Schema({timestamps: true})
 export class User {
     @Prop({required: true})
     name: string;
@@ -22,6 +22,11 @@ export class User {
     createdAt: Date;
     @Prop()
     updatedAt: Date;
+    @Prop()
+    isDeleted: boolean;
+    @Prop()
+    deletedAt: Date;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

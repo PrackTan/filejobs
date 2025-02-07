@@ -5,8 +5,8 @@ import { UserModule } from './user/user.module'; // Import UserModule từ file 
 import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigModule và ConfigService từ thư viện @nestjs/config
 import { MongooseModule } from '@nestjs/mongoose'; // Import MongooseModule từ thư viện @nestjs/mongoose
 import { AuthModule } from './auth/auth.module'; // Import AuthModule từ file auth.module
-import { APP_GUARD } from '@nestjs/core'; // Import APP_GUARD từ thư viện @nestjs/core
-import { JwtAuthGuard } from './auth/jwt-auth.guard'; // Import JwtAuthGuard từ file jwt-auth.guard
+import { softDeletePlugin } from 'soft-delete-plugin-mongoose'; // Import softDeletePlugin từ thư viện soft-delete-plugin-mongoose
+import { CompaniesModule } from './companies/companies.module';
 
 @Module({
   imports: [
@@ -16,18 +16,23 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard'; // Import JwtAuthGuard t�
       imports: [ConfigModule], // Đăng ký ConfigModule để sử dụng trong MongooseModule
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'), // Lấy URI của MongoDB từ ConfigService
+        connectionFactory: (connection) => {
+          connection.plugin(softDeletePlugin); // Sử dụng plugin softDeletePlugin cho kết nối
+          return connection; // Trả về kết nối đã được cấu hình
+        },
       }),
       inject: [ConfigService], // Tiêm ConfigService vào useFactory để sử dụng
     }),
-    AuthModule, // Đăng ký AuthModule để sử dụng trong AppModule
+    AuthModule,
+    CompaniesModule, // Đăng ký AuthModule để sử dụng trong AppModule
   ],
   controllers: [AppController], // Đăng ký AppController để xử lý các yêu cầu HTTP
   providers: [
     AppService, // Đăng ký AppService để cung cấp các dịch vụ cho AppModule
-    {
-      provide: APP_GUARD, // Cung cấp APP_GUARD để bảo vệ các route
-      useClass: JwtAuthGuard, // Sử dụng JwtAuthGuard để bảo vệ các route
-    },
+    // {
+    //   provide: APP_GUARD, // Cung cấp APP_GUARD để bảo vệ các route
+    //   useClass: JwtAuthGuard, // Sử dụng JwtAuthGuard để bảo vệ các route
+    // },
   ], // Đăng ký các provider cho AppModule
 })
 export class AppModule {} // Định nghĩa AppModule là module chính của ứng dụng

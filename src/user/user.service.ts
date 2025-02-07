@@ -2,15 +2,16 @@ import { Injectable } from '@nestjs/common'; // Import Injectable từ @nestjs/c
 import { CreateUserDto } from './dto/create-user.dto'; // Import CreateUserDto từ thư mục dto
 import { UpdateUserDto } from './dto/update-user.dto'; // Import UpdateUserDto từ thư mục dto
 import { InjectModel } from '@nestjs/mongoose'; // Import InjectModel từ @nestjs/mongoose
-import { User } from './schemas/user.schema'; // Import User từ thư mục schemas
+import { User, UserDocument } from './schemas/user.schema'; // Import User từ thư mục schemas
 import mongoose, { Model } from 'mongoose'; // Import Model từ mongoose
 import * as bcrypt from 'bcryptjs'; // Import thư viện bcryptjs để mã hóa mật khẩu
 import { ResponseDto } from './dto/reponse'; // Import ResponseDto từ thư mục dto
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
 @Injectable() // Đánh dấu class này có thể được tiêm vào các class khác
 export class UserService {
   constructor(
-    @InjectModel('User') private userModel: Model<User> 
+    @InjectModel('User') private userModel: SoftDeleteModel<UserDocument> 
   ) {} // Tiêm mô hình User vào constructor
 
   hashPassword = (plainPassword: string) => { // Hàm mã hóa mật khẩu
@@ -85,7 +86,7 @@ export class UserService {
     if(!mongoose.Types.ObjectId.isValid(id)){ // Kiểm tra id có hợp lệ không
       return new ResponseDto(400, 'Id không hợp lệ', null); // Trả về lỗi nếu id không hợp lệ
     }
-    const userDelete = await this.userModel.deleteOne({_id: id}); // Xóa người dùng theo id
+    const userDelete = await this.userModel.softDelete({_id: id}); // Xóa người dùng theo id
     return new ResponseDto(200, 'Xóa người dùng thành công', userDelete); // Trả về thông báo thành công
   }
 }
