@@ -6,6 +6,7 @@ import { LocalStrategy } from './passport/local.strategy'; // Import LocalStrate
 import { JwtModule } from '@nestjs/jwt'; // Import JwtModule từ thư viện @nestjs/jwt
 import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigModule và ConfigService từ thư viện @nestjs/config
 import { JwtStrategy } from './passport/jwt.strategy'; // Import JwtStrategy từ file jwt.strategy
+import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { JwtStrategy } from './passport/jwt.strategy'; // Import JwtStrategy t�
       inject: [ConfigService] // Inject ConfigService để có thể sử dụng trong useFactory
     })
   ],
+  controllers: [AuthController], // Đăng ký AuthController để xử lý các yêu cầu HTTP liên quan đến xác thực
   providers: [AuthService, LocalStrategy, JwtStrategy], // Đăng ký các provider: AuthService, LocalStrategy và JwtStrategy
   exports: [AuthService] // Export AuthService để có thể sử dụng ở các module khác
 })

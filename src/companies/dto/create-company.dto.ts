@@ -2,10 +2,9 @@ import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-vali
 
 // CreateCompanyDto class is used to define the structure and validation rules for creating a new Company.
 export class CreateCompanyDto {
+    _id: string;
     // The email field must be a valid email address.
-    @IsEmail(
-        {},{message: 'Tên công ty không đúng định dạng'}
-    )
+    @IsNotEmpty({message: 'Tên công ty không được để trống'})
     name: string;
 
 

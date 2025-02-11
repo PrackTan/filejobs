@@ -14,17 +14,5 @@ export class AppController {
     private conficeService: ConfigService, // Dịch vụ cấu hình
     private authService: AuthService // Dịch vụ xác thực
   ) {}
-  @Public()
-  @UseGuards(LocalAuthGuard) // Sử dụng LocalAuthGuard để bảo vệ route
-  @Post('/login') // Định nghĩa route POST /login
-  handleLogin(@Request() req) { // Xử lý đăng nhập
-    console.log(req.user); // In thông tin người dùng ra console
-    return this.authService.login(req.user); // Trả về token đăng nhập
-  }
 
-  // @UseGuards(JwtAuthGuard) // Sử dụng JwtAuthGuard để bảo vệ route
-  @Get('/profile') // Định nghĩa route GET /profile
-  getHello(@Request() req): string { // Xử lý yêu cầu lấy thông tin người dùng
-    return req.user; // Trả về thông tin người dùng
-  }
 }

@@ -9,6 +9,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') { // Định nghĩa lớp Jwt
         super(); // Gọi constructor của lớp cha
     }
     canActivate(context: ExecutionContext) { // Phương thức canActivate để kiểm tra xem yêu cầu có được phép hay không
+        // ExecutionContext cung cấp ngữ cảnh thực thi hiện tại, bao gồm các thông tin về request, handler và class
         const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [ // Lấy giá trị metadata isPublic từ handler và class
             context.getHandler(), // Lấy handler hiện tại
             context.getClass(), // Lấy class hiện tại
@@ -21,7 +22,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') { // Định nghĩa lớp Jwt
 
     handleRequest(err, user, info) { // Phương thức handleRequest để xử lý kết quả xác thực
         if(err || !user){ // Nếu có lỗi hoặc không có người dùng
-            throw err || new UnauthorizedException("lỗi token"); // Ném ra lỗi hoặc UnauthorizedException
+            throw err || new UnauthorizedException("Token không hợp lệ hoặc đã hết hạn"); // Ném ra lỗi hoặc UnauthorizedException
         }
         return user; // Trả về người dùng nếu xác thực thành công
     }

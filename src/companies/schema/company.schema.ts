@@ -10,7 +10,7 @@ export class Company {
     name: string;
     @Prop()
     address: string;
-    @Prop({required: true})
+    @Prop()
     phone: string;
     @Prop()
     email: string;
