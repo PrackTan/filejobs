@@ -14,7 +14,10 @@ import mongoose, { Model } from 'mongoose';
 import { ResponseDto } from 'src/user/dto/reponse';
 // Import SoftDeleteModel từ soft-delete-plugin-mongoose để hỗ trợ xóa mềm.
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { IUser } from 'src/user/users.interface';
+// Import IUser từ thư mục Interface để sử dụng cho việc định nghĩa cấu trúc dữ liệu người dùng.
+import { IUser } from 'src/Interface/users.interface';
+// Import aqp từ api-query-params để phân tích cú pháp query.
+import aqp from 'api-query-params';
 
 // Sử dụng decorator Injectable để đánh dấu class này có thể được tiêm vào các class khác.
 @Injectable()
@@ -22,18 +25,20 @@ export class CompaniesService {
   // Khởi tạo constructor với InjectModel để tiêm mô hình công ty vào service.
   constructor(
     // Sử dụng InjectModel để lấy mô hình công ty từ Mongoose.
-    @InjectModel(Company.name) 
+    @InjectModel(Company.name)
     // Khai báo companyModel là một SoftDeleteModel của CompanyDocument.
     private companyModel: SoftDeleteModel<CompanyDocument>,
-  ) {}
+  ) { }
 
   // Phương thức create để tạo một công ty mới.
-  async create(createCompanyDto: CreateCompanyDto,user:IUser) {
+  async create(createCompanyDto: CreateCompanyDto, user: any) { // interface any mới chạy được
     // Tạo một đối tượng công ty mới từ companyModel với dữ liệu từ createCompanyDto.
-    const company = await new this.companyModel({...createCompanyDto,createBy:{
-      _id:user._id,
-      name:user.name 
-    }}).save()
+    const company = await new this.companyModel({
+      ...createCompanyDto, createBy: {
+        _id: user._id,
+        name: user.name
+      }
+    }).save()
     // Lưu đối tượng công ty vào cơ sở dữ liệu.
     company.save()
     // Trả về một đối tượng ResponseDto với mã 200 và thông báo thành công.
@@ -41,9 +46,41 @@ export class CompaniesService {
   }
 
   // Phương thức findAll để lấy tất cả các công ty.
-  findAll() {
-    // Trả về một chuỗi thông báo rằng hành động này trả về tất cả các công ty.
-    return `This action returns all companies`;
+  async findAll(query: any, page: number, limit: number) {
+    // Sử dụng thư viện api-query-params để phân tích cú pháp query thành các phần tử filter, sort, projection, và population.
+    const { filter, sort, projection, population } = aqp(query)
+    // Xóa các thuộc tính page và limit khỏi filter vì chúng không cần thiết cho việc lọc dữ liệu.
+    delete filter.page
+    delete filter.limit
+    // Tính toán offset dựa trên số trang và giới hạn.
+    let offset = (page - 1) * (+limit);
+    // Đặt giới hạn mặc định là 10 nếu limit không được cung cấp.
+    let defaultLimit = +limit ? +limit : 10;
+
+    // Đếm tổng số mục dựa trên filter.
+    const totalItems = (await this.companyModel.countDocuments(filter))
+    // Tính toán tổng số trang dựa trên tổng số mục và giới hạn mặc định.
+    const totalPage = Math.ceil(totalItems / defaultLimit)
+    // Tìm các công ty dựa trên filter, offset, limit, sort, projection, và population.
+    // Tìm các công ty dựa trên filter, offset, limit, sort, projection, và population.
+    const result = await this.companyModel.find(filter) // Tìm các công ty dựa trên filter
+      .skip(offset) // Bỏ qua một số mục dựa trên offset
+      .limit(defaultLimit) // Giới hạn số lượng mục trả về dựa trên defaultLimit
+      .sort(sort as any) // Sắp xếp các mục dựa trên sort
+      .select(projection) // Chọn các trường cần thiết dựa trên projection
+      .populate(population) // Điền dữ liệu các trường liên quan dựa trên population
+    // Trả về đối tượng chứa thông tin meta và kết quả.
+    return {
+      meta: {
+        currentPage: page, // Trang hiện tại
+        itemCount: totalItems, // Tổng số mục
+        itemsPerPage: defaultLimit, // Số mục trên mỗi trang
+        totalItems, // Tổng số mục
+        totalPages: totalPage // Tổng số trang
+      },
+      result
+    }
+
   }
 
   // Phương thức findOne để lấy một công ty theo id.
@@ -53,27 +90,45 @@ export class CompaniesService {
   }
 
   // Phương thức update để cập nhật một công ty theo id.
-  async update(id: number, updateCompanyDto: UpdateCompanyDto,user:IUser) {
-   if(!mongoose.Types.ObjectId.isValid(updateCompanyDto._id)){
-    return new ResponseDto(400, 'Id không hợp lệ', null);
-   }
-   const company = await this.companyModel.findById(updateCompanyDto._id)
-   if(company){
-    company.updateOne({...updateCompanyDto,updateBy:{
-      _id:user._id,
-      name:user.name
-    }})
-    return new ResponseDto(200, 'Cập nhật công ty thành công', company);
-   }
-   return new ResponseDto(404, 'Công ty không tồn tại', null);
+  async update(updateCompanyDto: UpdateCompanyDto, user: any) {
+    // Kiểm tra tính hợp lệ của ObjectId.
+    if (!mongoose.Types.ObjectId.isValid(updateCompanyDto._id)) {
+      return new ResponseDto(400, 'Id không hợp lệ', null);
+    }
+    // Tìm công ty theo id.
+    const company = await this.companyModel.findById(updateCompanyDto._id)
+    if (company) {
+      // Cập nhật công ty với dữ liệu mới và thông tin người cập nhật.
+      return company.updateOne({ _id: updateCompanyDto._id }, {
+        ...updateCompanyDto, updateBy: {
+          _id: user._id,
+          name: user.name
+        }
+      })
+    }
+    // Trả về thông báo lỗi nếu công ty không tồn tại.
+    return new ResponseDto(404, 'Công ty không tồn tại', null);
   }
 
   // Phương thức remove để xóa một công ty theo id.
-  async remove(id: string) { // Phương thức xóa người dùng theo id
-    if(!mongoose.Types.ObjectId.isValid(id)){ // Kiểm tra id có hợp lệ không
-      return new ResponseDto(400, 'Id không hợp lệ', null); // Trả về lỗi nếu id không hợp lệ
+  async remove(id: string, user: any) { // Phương thức xóa người dùng theo id
+
+    // Tìm công ty theo id.
+    const company = await this.companyModel.findOne({ _id: id });
+    if (company) {
+      // Cập nhật thông tin người xóa.
+      await this.companyModel.updateOne({ _id: id }, {
+        deleteBy: {
+          _id: user._id,
+          name: user.name
+        }
+      })
+      // Xóa mềm công ty và trả về thông báo thành công.
+      return new ResponseDto(200, 'Xóa công ty thành công', await this.companyModel.softDelete({ _id: id })); // Xóa người dùng theo id
+      // return new ResponseDto(200, 'Xóa người dùng thành công', companyDelete); // Trả về thông báo thành công
     }
-    const companyDelete = await this.companyModel.softDelete({_id: id}); // Xóa người dùng theo id
-    return new ResponseDto(200, 'Xóa người dùng thành công', companyDelete); // Trả về thông báo thành công
+    // Trả về thông báo lỗi nếu công ty không tồn tại.
+    return new ResponseDto(404, 'Công ty không tồn tại', null);
+
   }
 }

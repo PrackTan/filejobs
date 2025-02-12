@@ -2,7 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt'; // Import ExtractJwt và St
 import { PassportStrategy } from '@nestjs/passport'; // Import PassportStrategy từ thư viện @nestjs/passport
 import { Injectable } from '@nestjs/common'; // Import Injectable từ thư viện @nestjs/common
 import { ConfigService } from '@nestjs/config'; // Import ConfigService từ thư viện @nestjs/config
-import { IUser } from 'src/user/users.interface';
+import { IUser } from 'src/Interface/users.interface';
 
 @Injectable() // Đánh dấu lớp JwtStrategy là một service có thể được inject vào các nơi khác
 export class JwtStrategy extends PassportStrategy(Strategy) { // Định nghĩa lớp JwtStrategy kế thừa từ PassportStrategy với chiến lược Strategy
@@ -16,7 +16,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) { // Định nghĩa 
     });
   }
 
-  async validate(payload: IUser) { // Hàm validate để xác thực payload của JWT
+  async validate(payload: any) { // Hàm validate để xác thực payload của JWT
+    console.log("check payload.data",payload);
+    if (!payload) {
+      throw new Error('Payload data is undefined');
+    }
     const {_id, email, role, name} = payload;
     return {_id, email, role, name}; // Trả về một đối tượng chứa userId và username từ payload
   }

@@ -7,7 +7,7 @@ import { UserService } from 'src/user/user.service';
 // Import JwtService từ @nestjs/jwt để tạo và xác thực token JWT
 import { JwtService } from '@nestjs/jwt';
 // Import IUser từ đường dẫn 'src/user/users.interface' để sử dụng interface người dùng
-import { IUser } from 'src/user/users.interface';
+import { IUser } from 'src/Interface/users.interface';
 // Sử dụng decorator @Injectable để đánh dấu AuthService là một service có thể được tiêm vào
 @Injectable()
 
@@ -44,18 +44,21 @@ export class AuthService {
     }
 
     // Định nghĩa hàm login để đăng nhập và tạo token
-    async login(user: IUser) {
+    async login(user: any) {
+        
         if(user){
-            const {_id, email, role, name} = user; // Lấy thông tin cần thiết từ đối tượng user
+            console.log(user);
+            const {_id, email, role, name} = user.data; // Lấy thông tin cần thiết từ đối tượng user
             // Tạo payload chứa thông tin người dùng để tạo token
-        const payload = { 
-            sub:"token login", // Đặt subject cho token
-            iss:"from sever", // Đặt issuer cho token
-            email, // Thêm email vào payload
-            _id, // Thêm _id vào payload
-            role, // Thêm role vào payload
-            name // Thêm name vào payload
-        };
+            // console.log("check user>>>>>>>>>>>>>",user.data);
+            const payload = { 
+                sub:"token login", // Đặt subject cho token
+                iss:"from sever", // Đặt issuer cho token
+                email, // Thêm email vào payload
+                _id, // Thêm _id vào payload
+                role, // Thêm role vào payload
+                name // Thêm name vào payload
+            };
         // Trả về token truy cập và thông tin người dùng
         return {
             access_token: this.jwtService.sign(payload), // Tạo token từ payload

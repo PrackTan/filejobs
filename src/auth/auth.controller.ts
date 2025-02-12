@@ -12,7 +12,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard) // Sử dụng LocalAuthGuard để bảo vệ route, chỉ cho phép truy cập nếu xác thực thành công
   @Post('/login') // Định nghĩa route POST /login
   handleLogin(@Request() req) { // Xử lý yêu cầu đăng nhập
-    console.log(req.user); // In thông tin người dùng ra console
+    // console.log(req.user); // In thông tin người dùng ra console
     return this.authService.login(req.user); // Trả về token đăng nhập sau khi xác thực thành công
   }
 

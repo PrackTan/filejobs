@@ -11,7 +11,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 @Injectable() // Đánh dấu class này có thể được tiêm vào các class khác
 export class UserService {
   constructor(
-    @InjectModel('User') private userModel: SoftDeleteModel<UserDocument> 
+    @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument> 
   ) {} // Tiêm mô hình User vào constructor
 
   hashPassword = (plainPassword: string) => { // Hàm mã hóa mật khẩu
@@ -84,9 +84,16 @@ export class UserService {
 
   async remove(id: string) { // Phương thức xóa người dùng theo id
     if(!mongoose.Types.ObjectId.isValid(id)){ // Kiểm tra id có hợp lệ không
-      return new ResponseDto(400, 'Id không hợp lệ', null); // Trả về lỗi nếu id không hợp lệ
+      return new ResponseDto(400, 'Id không đúng định dạng', null); // Trả về lỗi nếu id không hợp lệ
     }
-    const userDelete = await this.userModel.softDelete({_id: id}); // Xóa người dùng theo id
-    return new ResponseDto(200, 'Xóa người dùng thành công', userDelete); // Trả về thông báo thành công
+    const user = await this.userModel.findOne({_id:id});
+    if(user){
+      await this.userModel.updateOne({_id:id},{deleteBy:{
+        _id:user._id,
+        name:user.name
+      }})
+      return new ResponseDto(200, 'Xóa người dùng thành công', await this.userModel.softDelete({_id: id})); // Xóa người dùng theo id
+    }
+    return new ResponseDto(404, 'Người dùng không tồn tại', null);
   }
 }

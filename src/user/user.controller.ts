@@ -3,14 +3,14 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
-
+import { Public } from 'src/decorator/customizeDecoratior';
 @Controller('users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
   ) {}
-
-  @Post()
+  @Public()
+  @Post("signup")
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
