@@ -1,18 +1,17 @@
-import { Injectable } from '@nestjs/common'; // Import Injectable từ @nestjs/common
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common'; // Import HttpException và HttpStatus từ @nestjs/common
 import { CreateUserDto } from './dto/create-user.dto'; // Import CreateUserDto từ thư mục dto
 import { UpdateUserDto } from './dto/update-user.dto'; // Import UpdateUserDto từ thư mục dto
 import { InjectModel } from '@nestjs/mongoose'; // Import InjectModel từ @nestjs/mongoose
 import { User, UserDocument } from './schemas/user.schema'; // Import User từ thư mục schemas
 import mongoose, { Model } from 'mongoose'; // Import Model từ mongoose
 import * as bcrypt from 'bcryptjs'; // Import thư viện bcryptjs để mã hóa mật khẩu
-import { ResponseDto } from './dto/reponse'; // Import ResponseDto từ thư mục dto
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
 @Injectable() // Đánh dấu class này có thể được tiêm vào các class khác
 export class UserService {
   constructor(
-    @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument> 
-  ) {} // Tiêm mô hình User vào constructor
+    @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>
+  ) { } // Tiêm mô hình User vào constructor
 
   hashPassword = (plainPassword: string) => { // Hàm mã hóa mật khẩu
     const salt = bcrypt.genSaltSync(10); // Tạo muối với độ dài 10
@@ -21,12 +20,12 @@ export class UserService {
   }
 
   async create(createUserDto: CreateUserDto) { // Phương thức tạo người dùng mới
-    const checkEmail = await this.userModel.findOne({email: createUserDto.email}); // Kiểm tra email đã tồn tại chưa
-    if(checkEmail){
-      return new ResponseDto(400, 'Email đã tồn tại', null); // Trả về lỗi nếu email đã tồn tại
+    const checkEmail = await this.userModel.findOne({ email: createUserDto.email }); // Kiểm tra email đã tồn tại chưa
+    if (checkEmail) {
+      throw new HttpException('Email đã tồn tại', HttpStatus.CONFLICT); // Ném lỗi nếu email đã tồn tại
     }
     const hashedPassword = this.hashPassword(createUserDto.password); // Mã hóa mật khẩu
-    try{
+    try {
       let user = await this.userModel.create({ // Tạo người dùng mới
         name: createUserDto.name,
         password: hashedPassword,
@@ -36,9 +35,9 @@ export class UserService {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-      return new ResponseDto(200, 'Tạo người dùng thành công', user); // Trả về thông báo thành công
-    }catch(error){
-      return new ResponseDto(500, 'Lỗi máy chủ nội bộ', null); // Trả về lỗi nếu có lỗi xảy ra
+      return user; // Trả về thông báo thành công
+    } catch (error) {
+      throw new HttpException('Lỗi khi tạo người dùng', HttpStatus.INTERNAL_SERVER_ERROR); // Ném lỗi nếu có lỗi xảy ra
     }
   }
 
@@ -47,19 +46,19 @@ export class UserService {
   }
 
   async findOne(id: string) { // Phương thức tìm một người dùng theo id
-    if(!mongoose.Types.ObjectId.isValid(id)){ // Kiểm tra id có hợp lệ không
-      return new ResponseDto(400, 'Id không hợp lệ', null); // Trả về lỗi nếu id không hợp lệ
+    if (!mongoose.Types.ObjectId.isValid(id)) { // Kiểm tra id có hợp lệ không
+      throw new HttpException('Id không hợp lệ', HttpStatus.BAD_REQUEST); // Ném lỗi nếu id không hợp lệ
     }
     const user = await this.userModel.findById(id); // Tìm người dùng theo id
-    if(!user){
-      return new ResponseDto(404, 'Không tìm thấy người dùng', null); // Trả về lỗi nếu không tìm thấy người dùng
+    if (!user) {
+      throw new HttpException('Không tìm thấy người dùng', HttpStatus.NOT_FOUND); // Ném lỗi nếu không tìm thấy người dùng
     }
-    return new ResponseDto(200, 'Tìm thấy người dùng', user); // Trả về thông báo thành công
+    return user; // Trả về người dùng nếu tìm thấy
   }
 
   async findOneByEmail(email: string) { // Phương thức tìm một người dùng theo email
-    const user = await this.userModel.findOne({email: email}); // Tìm người dùng theo email
-    if(!user){
+    const user = await this.userModel.findOne({ email: email }); // Tìm người dùng theo email
+    if (!user) {
       return null; // Trả về null nếu không tìm thấy người dùng
     }
     return user; // Trả về người dùng nếu tìm thấy
@@ -70,30 +69,33 @@ export class UserService {
   }
 
   async update(updateUserDto: UpdateUserDto) { // Phương thức cập nhật người dùng theo id
-    if(!mongoose.Types.ObjectId.isValid(updateUserDto._id)){ // Kiểm tra id có hợp lệ không
-      return new ResponseDto(400, 'Id không hợp lệ', null); // Trả về lỗi nếu id không hợp lệ
+    if (!mongoose.Types.ObjectId.isValid(updateUserDto._id)) { // Kiểm tra id có hợp lệ không
+      throw new HttpException('Id không hợp lệ', HttpStatus.BAD_REQUEST); // Ném lỗi nếu id không hợp lệ
     }
     const userId = await this.userModel.findById(updateUserDto._id); // Tìm người dùng theo id
-    if(!userId){
-      return new ResponseDto(404, 'Không tìm thấy người dùng', null); // Trả về lỗi nếu không tìm thấy người dùng
+    if (!userId) {
+      throw new HttpException('Không tìm thấy người dùng', HttpStatus.NOT_FOUND); // Ném lỗi nếu không tìm thấy người dùng
     }
-    const userUpdate = await this.userModel.updateOne({_id: updateUserDto._id}, {...updateUserDto}); // Cập nhật người dùng
+    const userUpdate = await this.userModel.updateOne({ _id: updateUserDto._id }, { ...updateUserDto }); // Cập nhật người dùng
     console.log("userUpdate", userUpdate); // In ra thông tin cập nhật
-    return new ResponseDto(200, 'Cập nhật người dùng thành công', userUpdate); // Trả về thông báo thành công
+    return userUpdate; // Trả về thông tin cập nhật
   }
 
   async remove(id: string) { // Phương thức xóa người dùng theo id
-    if(!mongoose.Types.ObjectId.isValid(id)){ // Kiểm tra id có hợp lệ không
-      return new ResponseDto(400, 'Id không đúng định dạng', null); // Trả về lỗi nếu id không hợp lệ
+    if (!mongoose.Types.ObjectId.isValid(id)) { // Kiểm tra id có hợp lệ không
+      throw new HttpException('Id không đúng định dạng', HttpStatus.BAD_REQUEST); // Ném lỗi nếu id không hợp lệ
     }
-    const user = await this.userModel.findOne({_id:id});
-    if(user){
-      await this.userModel.updateOne({_id:id},{deleteBy:{
-        _id:user._id,
-        name:user.name
-      }})
-      return new ResponseDto(200, 'Xóa người dùng thành công', await this.userModel.softDelete({_id: id})); // Xóa người dùng theo id
+    const user = await this.userModel.findOne({ _id: id });
+    if (user) {
+      await this.userModel.updateOne({ _id: id }, {
+        deleteBy: {
+          _id: user._id,
+          name: user.name
+        }
+      });
+      await this.userModel.softDelete({ _id: id }); // Xóa người dùng theo id
+      return { message: 'Xóa thành công', data: true }; // Trả về thông báo thành công và data là true
     }
-    return new ResponseDto(404, 'Người dùng không tồn tại', null);
+    throw new HttpException('Người dùng không tồn tại', HttpStatus.NOT_FOUND); // Ném lỗi nếu người dùng không tồn tại
   }
 }

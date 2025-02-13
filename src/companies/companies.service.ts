@@ -10,8 +10,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Company, CompanyDocument } from './schema/company.schema';
 // Import Model từ mongoose để làm việc với mô hình Mongoose.
 import mongoose, { Model } from 'mongoose';
-// Import ResponseDto từ thư mục dto để định dạng phản hồi.
-import { ResponseDto } from 'src/user/dto/reponse';
 // Import SoftDeleteModel từ soft-delete-plugin-mongoose để hỗ trợ xóa mềm.
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 // Import IUser từ thư mục Interface để sử dụng cho việc định nghĩa cấu trúc dữ liệu người dùng.
@@ -41,8 +39,8 @@ export class CompaniesService {
     }).save()
     // Lưu đối tượng công ty vào cơ sở dữ liệu.
     company.save()
-    // Trả về một đối tượng ResponseDto với mã 200 và thông báo thành công.
-    return new ResponseDto(200, 'Tạo công ty thành công', company);
+    // Trả về đối tượng công ty đã tạo.
+    return company;
   }
 
   // Phương thức findAll để lấy tất cả các công ty.
@@ -61,7 +59,6 @@ export class CompaniesService {
     const totalItems = (await this.companyModel.countDocuments(filter))
     // Tính toán tổng số trang dựa trên tổng số mục và giới hạn mặc định.
     const totalPage = Math.ceil(totalItems / defaultLimit)
-    // Tìm các công ty dựa trên filter, offset, limit, sort, projection, và population.
     // Tìm các công ty dựa trên filter, offset, limit, sort, projection, và population.
     const result = await this.companyModel.find(filter) // Tìm các công ty dựa trên filter
       .skip(offset) // Bỏ qua một số mục dựa trên offset
@@ -93,21 +90,22 @@ export class CompaniesService {
   async update(updateCompanyDto: UpdateCompanyDto, user: any) {
     // Kiểm tra tính hợp lệ của ObjectId.
     if (!mongoose.Types.ObjectId.isValid(updateCompanyDto._id)) {
-      return new ResponseDto(400, 'Id không hợp lệ', null);
+      return { statusCode: 400, message: 'Id không hợp lệ', data: null };
     }
     // Tìm công ty theo id.
     const company = await this.companyModel.findById(updateCompanyDto._id)
     if (company) {
       // Cập nhật công ty với dữ liệu mới và thông tin người cập nhật.
-      return company.updateOne({ _id: updateCompanyDto._id }, {
+      await company.updateOne({ _id: updateCompanyDto._id }, {
         ...updateCompanyDto, updateBy: {
           _id: user._id,
           name: user.name
         }
       })
+      return company;
     }
     // Trả về thông báo lỗi nếu công ty không tồn tại.
-    return new ResponseDto(404, 'Công ty không tồn tại', null);
+    return { statusCode: 404, message: 'Công ty không tồn tại', data: null };
   }
 
   // Phương thức remove để xóa một công ty theo id.
@@ -124,11 +122,11 @@ export class CompaniesService {
         }
       })
       // Xóa mềm công ty và trả về thông báo thành công.
-      return new ResponseDto(200, 'Xóa công ty thành công', await this.companyModel.softDelete({ _id: id })); // Xóa người dùng theo id
-      // return new ResponseDto(200, 'Xóa người dùng thành công', companyDelete); // Trả về thông báo thành công
+      await this.companyModel.softDelete({ _id: id });
+      return { statusCode: 200, message: 'Xóa công ty thành công', data: company };
     }
     // Trả về thông báo lỗi nếu công ty không tồn tại.
-    return new ResponseDto(404, 'Công ty không tồn tại', null);
+    return { statusCode: 404, message: 'Công ty không tồn tại', data: null };
 
   }
 }
