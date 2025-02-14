@@ -1,11 +1,12 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common'; // Import HttpException và HttpStatus từ @nestjs/common
-import { CreateUserDto } from './dto/create-user.dto'; // Import CreateUserDto từ thư mục dto
+import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto'; // Import CreateUserDto từ thư mục dto
 import { UpdateUserDto } from './dto/update-user.dto'; // Import UpdateUserDto từ thư mục dto
 import { InjectModel } from '@nestjs/mongoose'; // Import InjectModel từ @nestjs/mongoose
 import { User, UserDocument } from './schemas/user.schema'; // Import User từ thư mục schemas
 import mongoose, { Model } from 'mongoose'; // Import Model từ mongoose
 import * as bcrypt from 'bcryptjs'; // Import thư viện bcryptjs để mã hóa mật khẩu
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import aqp from 'api-query-params';
 
 @Injectable() // Đánh dấu class này có thể được tiêm vào các class khác
 export class UserService {
@@ -18,13 +19,35 @@ export class UserService {
     const hash = bcrypt.hashSync(plainPassword, salt); // Mã hóa mật khẩu với muối
     return hash; // Trả về mật khẩu đã mã hóa
   }
-
+  async register(registerUserDto: RegisterUserDto) {
+    const checkEmail = await this.userModel.findOne({ email: registerUserDto?.email }); // Kiểm tra email đã tồn tại chưa
+    if (checkEmail) {
+      throw new HttpException('Email đã tồn tại', HttpStatus.CONFLICT); // Ném lỗi nếu email đã tồn tại
+    }
+    const hashedPassword = this.hashPassword(registerUserDto?.password); // Mã hóa mật khẩu
+    try {
+      let user = await this.userModel.create({ // Tạo người dùng mới
+        name: registerUserDto?.name,
+        password: hashedPassword,
+        email: registerUserDto?.email,
+        address: registerUserDto?.address,
+        phone: registerUserDto?.phone,
+        gender: registerUserDto?.gender,
+        role: "USER",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      return { id: user._id, createdAt: user.createdAt }; // Trả về id người dùng mới tạo và ngày tạo
+    } catch (error) {
+      throw new HttpException('Lỗi khi tạo người dùng', HttpStatus.INTERNAL_SERVER_ERROR); // Ném lỗi nếu có lỗi xảy ra
+    }
+  }
   async create(createUserDto: CreateUserDto) { // Phương thức tạo người dùng mới
     const checkEmail = await this.userModel.findOne({ email: createUserDto.email }); // Kiểm tra email đã tồn tại chưa
     if (checkEmail) {
       throw new HttpException('Email đã tồn tại', HttpStatus.CONFLICT); // Ném lỗi nếu email đã tồn tại
     }
-    const hashedPassword = this.hashPassword(createUserDto.password); // Mã hóa mật khẩu
+    const hashedPassword = this.hashPassword(createUserDto?.password); // Mã hóa mật khẩu
     try {
       let user = await this.userModel.create({ // Tạo người dùng mới
         name: createUserDto.name,
@@ -32,17 +55,42 @@ export class UserService {
         email: createUserDto.email,
         address: createUserDto.address,
         phone: createUserDto.phone,
+        role: createUserDto.role,
+        gender: createUserDto.gender,
+        company: createUserDto.company,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-      return user; // Trả về thông báo thành công
+      return { _id: user._id, createdAt: user.createdAt }; // Trả về thông báo thành công
     } catch (error) {
       throw new HttpException('Lỗi khi tạo người dùng', HttpStatus.INTERNAL_SERVER_ERROR); // Ném lỗi nếu có lỗi xảy ra
     }
   }
 
-  findAll() { // Phương thức tìm tất cả người dùng
-    return `Hành động này trả về tất cả người dùng`; // Trả về thông báo hành động trả về tất cả người dùng
+  async findAll(query: any, page: number, limit: number) { // Phương thức tìm tất cả người dùng
+    const { filter, sort, projection, population } = aqp(query)
+    delete filter.page
+    delete filter.limit
+    let offset = (page - 1) * (+limit);
+    let defaultLimit = +limit ? +limit : 10;
+    const totalItems = (await this.userModel.countDocuments(filter))
+    const totalPage = Math.ceil(totalItems / defaultLimit)
+    const result = await this.userModel.find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      .sort(sort as any)
+      .select(projection)
+      .populate(population)
+    return {
+      meta: {
+        currentPage: page,
+        itemCount: totalItems,
+        itemsPerPage: defaultLimit,
+        totalItems,
+        totalPages: totalPage
+      },
+      result
+    }
   }
 
   async findOne(id: string) { // Phương thức tìm một người dùng theo id
@@ -53,7 +101,8 @@ export class UserService {
     if (!user) {
       throw new HttpException('Không tìm thấy người dùng', HttpStatus.NOT_FOUND); // Ném lỗi nếu không tìm thấy người dùng
     }
-    return user; // Trả về người dùng nếu tìm thấy
+    const { password, ...userWithoutPassword } = user.toObject(); // Loại bỏ password khỏi kết quả
+    return userWithoutPassword; // Trả về người dùng nếu tìm thấy
   }
 
   async findOneByEmail(email: string) { // Phương thức tìm một người dùng theo email
@@ -77,7 +126,7 @@ export class UserService {
       throw new HttpException('Không tìm thấy người dùng', HttpStatus.NOT_FOUND); // Ném lỗi nếu không tìm thấy người dùng
     }
     const userUpdate = await this.userModel.updateOne({ _id: updateUserDto._id }, { ...updateUserDto }); // Cập nhật người dùng
-    console.log("userUpdate", userUpdate); // In ra thông tin cập nhật
+    // console.log("userUpdate", userUpdate); // In ra thông tin cập nhật
     return userUpdate; // Trả về thông tin cập nhật
   }
 
@@ -93,8 +142,7 @@ export class UserService {
           name: user.name
         }
       });
-      await this.userModel.softDelete({ _id: id }); // Xóa người dùng theo id
-      return { message: 'Xóa thành công', data: true }; // Trả về thông báo thành công và data là true
+      return await this.userModel.softDelete({ _id: id }); // Xóa người dùng theo id
     }
     throw new HttpException('Người dùng không tồn tại', HttpStatus.NOT_FOUND); // Ném lỗi nếu người dùng không tồn tại
   }

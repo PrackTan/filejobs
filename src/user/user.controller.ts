@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,25 +8,24 @@ import { Public } from 'src/decorator/customizeDecoratior';
 export class UserController {
   constructor(
     private readonly userService: UserService,
-  ) {}
-  @Public()
+  ) { }
   @Post("signup")
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  findAll() { 
-    return this.userService.findAll();
+  findAll(@Query() query: any, @Query("page") page: number, @Query("limit") limit: number) {
+    return this.userService.findAll(query, page, limit);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id); // +id là chuyển id sang số
-  }   
+  }
   @Patch()
   update(@Body() updateUserDto: UpdateUserDto) {
-    console.log("update id",updateUserDto._id);
+    console.log("update id", updateUserDto._id);
     return this.userService.update(updateUserDto);
   }
 

@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { CompaniesService } from './companies.service'; // Import service CompaniesService để xử lý logic nghiệp vụ
 import { CreateCompanyDto } from './dto/create-company.dto'; // Import DTO để tạo công ty
 import { UpdateCompanyDto } from './dto/update-company.dto'; // Import DTO để cập nhật công ty
-import { RequestDto } from 'src/user/dto/request'; // Import DTO cho request
 import { ResponseMessage, User } from 'src/decorator/customizeDecoratior'; // Import decorator User để lấy thông tin người dùng
 import { IUser } from 'src/Interface/users.interface'; // Import interface IUser để định nghĩa cấu trúc dữ liệu người dùng
 
