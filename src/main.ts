@@ -4,7 +4,7 @@ import { AppModule } from './app.module'; // Import AppModule, module gốc củ
 import { ValidationPipe, VersioningType } from '@nestjs/common'; // Import ValidationPipe để xác thực dữ liệu và VersioningType để quản lý phiên bản API
 import { JwtAuthGuard } from './auth/jwt-auth.guard'; // Import JwtAuthGuard để bảo vệ các route bằng JWT
 import { TransformInterceptor } from './interceptor/transform.interceptor'; // Import TransformInterceptor để can thiệp vào quá trình xử lý response
-
+import * as cookieParser from 'cookie-parser'; // Import cookieParser để phân tích cookie từ request
 // Định nghĩa hàm bất đồng bộ bootstrap để khởi động ứng dụng
 async function bootstrap() {
   // Tạo một ứng dụng NestJS từ AppModule
@@ -21,6 +21,9 @@ async function bootstrap() {
 
   // Sử dụng JwtAuthGuard để bảo vệ các route bằng JWT
   app.useGlobalGuards(new JwtAuthGuard(reflector)); // Đăng ký JwtAuthGuard toàn cục để bảo vệ các route bằng cách xác thực JWT
+
+  // cookie
+  app.use(cookieParser());
 
   // Kích hoạt CORS với các cấu hình cụ thể
   app.enableCors({

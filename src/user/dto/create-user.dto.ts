@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 
 
 class Company {
+    @IsNotEmpty({ message: 'ID công ty không được để trống' })
     _id: mongoose.Schema.Types.ObjectId;
     @IsNotEmpty({ message: 'Tên công ty không được để trống' })
     name: string;

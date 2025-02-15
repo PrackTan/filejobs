@@ -34,7 +34,7 @@ export class CompaniesService {
     const company = await new this.companyModel({
       ...createCompanyDto, createBy: {
         _id: user._id,
-        name: user.name
+        name: user.email
       }
     }).save()
     // Lưu đối tượng công ty vào cơ sở dữ liệu.
@@ -99,7 +99,7 @@ export class CompaniesService {
       await company.updateOne({ _id: updateCompanyDto._id }, {
         ...updateCompanyDto, updateBy: {
           _id: user._id,
-          name: user.name
+          name: user.email
         }
       })
       return company;
@@ -118,7 +118,7 @@ export class CompaniesService {
       await this.companyModel.updateOne({ _id: id }, {
         deleteBy: {
           _id: user._id,
-          name: user.name
+          name: user.email
         }
       })
       // Xóa mềm công ty và trả về thông báo thành công.
