@@ -44,16 +44,16 @@ export class CompaniesService {
   }
 
   // Phương thức findAll để lấy tất cả các công ty.
-  async findAll(query: any, page: number, limit: number) {
+  async findAll(query: any, current: number, pageSize: number) {
     // Sử dụng thư viện api-query-params để phân tích cú pháp query thành các phần tử filter, sort, projection, và population.
     const { filter, sort, projection, population } = aqp(query)
     // Xóa các thuộc tính page và limit khỏi filter vì chúng không cần thiết cho việc lọc dữ liệu.
-    delete filter.page
-    delete filter.limit
+    delete filter.current
+    delete filter.pageSize
     // Tính toán offset dựa trên số trang và giới hạn.
-    let offset = (page - 1) * (+limit);
+    let offset = (current - 1) * (+pageSize);
     // Đặt giới hạn mặc định là 10 nếu limit không được cung cấp.
-    let defaultLimit = +limit ? +limit : 10;
+    let defaultLimit = +pageSize ? +pageSize : 10;
 
     // Đếm tổng số mục dựa trên filter.
     const totalItems = (await this.companyModel.countDocuments(filter))
@@ -69,7 +69,7 @@ export class CompaniesService {
     // Trả về đối tượng chứa thông tin meta và kết quả.
     return {
       meta: {
-        currentPage: page, // Trang hiện tại
+        current: current, // Trang hiện tại
         itemCount: totalItems, // Tổng số mục
         itemsPerPage: defaultLimit, // Số mục trên mỗi trang
         totalItems, // Tổng số mục

@@ -43,7 +43,7 @@ export class AuthService {
         // Trả về null nếu không hợp lệ
         return null;
     }
-    createRefreshToken(user: IUser) {
+    createRefreshToken(user: any) {
         const refreshToken = this.jwtService.sign(user, {
             secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
             expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN')
@@ -94,5 +94,59 @@ export class AuthService {
     async register(registerUserDto: RegisterUserDto) {
         return this.userService.register(registerUserDto);
     }
-
+    // Định nghĩa hàm getNewToken để lấy token mới từ refresh token
+    // Định nghĩa hàm bất đồng bộ getNewToken để lấy token mới từ refresh token
+    async getNewToken(refreshToken: string, res) {
+        try {
+            // Giải mã refresh token bằng jwtService với secret lấy từ configService
+            await this.jwtService.verifyAsync(refreshToken, { secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET') });
+            // Tìm người dùng dựa trên refresh token
+            let user = await this.userService.findUserByRefreshToken(refreshToken);
+            // Nếu tìm thấy người dùng
+            if (user) {
+                // Lấy thông tin cần thiết từ đối tượng user
+                const { _id, email, role, name } = user;
+                // Tạo payload chứa thông tin người dùng để tạo token
+                const payload = { _id, email, role, name, sub: "token refresh", iss: "from sever" };
+                // Tạo token làm mới
+                const refreshToken = this.createRefreshToken(payload);
+                // Cập nhật token làm mới cho người dùng
+                await this.userService.updateUserToken(refreshToken, _id.toString());
+                // Xóa cookie refresh token
+                res.clearCookie('refresh_token');
+                // Thiết lập cookie cho refresh token
+                res.cookie('refresh_token', refreshToken, {
+                    httpOnly: true, // chỉ truy cập được từ server
+                    secure: true, // chỉ truy cập được từ server
+                    maxAge: 1000 * 60 * 60 * 24 * 30 // 30 ngày
+                });
+                // Trả về token truy cập và thông tin người dùng
+                return {
+                    access_token: this.jwtService.sign(payload), // Tạo token từ payload
+                    user: {
+                        _id, // Trả về _id của người dùng
+                        email, // Trả về email của người dùng
+                        name // Trả về name của người dùng
+                    }
+                }
+            }
+            else {
+                // Ném ra ngoại lệ nếu không tìm thấy người dùng
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
+        } catch (error) {
+            // Ném ra ngoại lệ nếu refresh token không hợp lệ
+            throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
+        }
+    }
+    async logout(res, user) {
+        if (user) {
+            await this.userService.updateUserToken('', user._id);
+            res.clearCookie('refresh_token');
+            return 'Logout success';
+        }
+        else {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+    }
 }

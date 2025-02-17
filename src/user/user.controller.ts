@@ -16,8 +16,8 @@ export class UserController {
   }
 
   @Get()
-  findAll(@Query() query: any, @Query("page") page: number, @Query("limit") limit: number) {
-    return this.userService.findAll(query, page, limit);
+  findAll(@Query() query: any, @Query("current") current: number, @Query("pageSize") pageSize: number) {
+    return this.userService.findAll(query, current, pageSize);
   }
 
   @Get(':id')

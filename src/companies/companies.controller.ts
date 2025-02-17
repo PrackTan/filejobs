@@ -16,8 +16,8 @@ export class CompaniesController {
   }
   @ResponseMessage('Lấy thông tin công ty theo page, limit ')
   @Get() // Định nghĩa route GET để lấy danh sách tất cả công ty
-  findAll(@Query() query: string, @Query('page') page: number, @Query('limit') limit: number) {
-    return this.companiesService.findAll(query, page, limit); // Gọi service để lấy danh sách công ty
+  findAll(@Query() query: string, @Query('current') current: number, @Query('pageSize') pageSize: number) {
+    return this.companiesService.findAll(query, current, pageSize); // Gọi service để lấy danh sách công ty
   }
 
   @Get(':id') // Định nghĩa route GET để lấy thông tin công ty theo id

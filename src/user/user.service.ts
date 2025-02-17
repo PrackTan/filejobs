@@ -72,12 +72,12 @@ export class UserService {
     }
   }
 
-  async findAll(query: any, page: number, limit: number) { // Phương thức tìm tất cả người dùng
+  async findAll(query: any, current: number, pageSize: number) { // Phương thức tìm tất cả người dùng
     const { filter, sort, projection, population } = aqp(query) // Phân tích query để lấy ra các thông tin lọc, sắp xếp, chọn trường và populate
-    delete filter.page // Xóa thuộc tính page khỏi filter để tránh ảnh hưởng đến việc tìm kiếm
-    delete filter.limit // Xóa thuộc tính limit khỏi filter để tránh ảnh hưởng đến việc tìm kiếm
-    let offset = (page - 1) * (+limit); // Tính toán vị trí bắt đầu (offset) cho việc phân trang dựa trên số trang và giới hạn
-    let defaultLimit = +limit ? +limit : 10; // Đặt giới hạn mặc định cho số lượng mục trên mỗi trang, nếu không có limit thì mặc định là 10
+    delete filter.current // Xóa thuộc tính page khỏi filter để tránh ảnh hưởng đến việc tìm kiếm
+    delete filter.pageSize // Xóa thuộc tính pageSize khỏi filter để tránh ảnh hưởng đến việc tìm kiếm
+    let offset = (current - 1) * (+pageSize); // Tính toán vị trí bắt đầu (offset) cho việc phân trang dựa trên số trang và giới hạn
+    let defaultLimit = +pageSize ? +pageSize : 10; // Đặt giới hạn mặc định cho số lượng mục trên mỗi trang, nếu không có limit thì mặc định là 10
     const totalItems = (await this.userModel.countDocuments(filter)) // Đếm tổng số mục theo điều kiện filter để biết có bao nhiêu mục thỏa mãn
     const totalPage = Math.ceil(totalItems / defaultLimit) // Tính tổng số trang dựa trên tổng số mục và giới hạn mỗi trang
     const result = await this.userModel.find(filter) // Tìm các mục theo điều kiện filter
@@ -88,7 +88,7 @@ export class UserService {
       .populate(population) // Populate các trường liên quan theo population để lấy dữ liệu liên quan từ các bảng khác
     return { // Trả về kết quả bao gồm thông tin phân trang và danh sách kết quả
       meta: {
-        currentPage: page, // Trang hiện tại để biết người dùng đang ở trang nào
+        current: current, // Trang hiện tại để biết người dùng đang ở trang nào
         itemCount: totalItems, // Tổng số mục để biết có bao nhiêu mục thỏa mãn điều kiện
         itemsPerPage: defaultLimit, // Số lượng mục trên mỗi trang để biết giới hạn mỗi trang
         totalItems, // Tổng số mục để biết có bao nhiêu mục thỏa mãn điều kiện
@@ -161,6 +161,10 @@ export class UserService {
       throw new HttpException('Id không hợp lệ', HttpStatus.BAD_REQUEST); // Ném lỗi nếu id không hợp lệ
     }
     const user = await this.userModel.updateOne({ _id: id }, { refreshToken: refreshToken });
+    return user;
+  }
+  findUserByRefreshToken = async (refreshToken: string) => {
+    const user = await this.userModel.findOne({ refreshToken: refreshToken });
     return user;
   }
 }

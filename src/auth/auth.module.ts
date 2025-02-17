@@ -17,7 +17,7 @@ import { AuthController } from './auth.controller';
 
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'), // Lấy giá trị bí mật JWT_SECRET từ ConfigService
-        signOptions: { expiresIn: '1h' } // Thiết lập thời gian hết hạn của token là 1 giờ
+        signOptions: { expiresIn: configService.get('JWT_EXPIRES_IN') } // Thiết lập thời gian hết hạn của token là 1 giờ
       }),
       inject: [ConfigService] // Inject ConfigService để có thể sử dụng trong useFactory
     })
@@ -26,4 +26,4 @@ import { AuthController } from './auth.controller';
   providers: [AuthService, LocalStrategy, JwtStrategy], // Đăng ký các provider: AuthService, LocalStrategy và JwtStrategy
   exports: [AuthService] // Export AuthService để có thể sử dụng ở các module khác
 })
-export class AuthModule {} // Định nghĩa AuthModule là một module của ứng dụng
+export class AuthModule { } // Định nghĩa AuthModule là một module của ứng dụng
