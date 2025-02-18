@@ -7,6 +7,8 @@ import { MongooseModule } from '@nestjs/mongoose'; // Import MongooseModule từ
 import { AuthModule } from './auth/auth.module'; // Import AuthModule từ file auth.module
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose'; // Import softDeletePlugin từ thư viện soft-delete-plugin-mongoose
 import { CompaniesModule } from './companies/companies.module';
+import { JobsModule } from './jobs/jobs.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -24,7 +26,9 @@ import { CompaniesModule } from './companies/companies.module';
       inject: [ConfigService], // Tiêm ConfigService vào useFactory để sử dụng
     }),
     AuthModule,
-    CompaniesModule, // Đăng ký AuthModule để sử dụng trong AppModule
+    CompaniesModule,
+    JobsModule,
+    FilesModule, // Đăng ký AuthModule để sử dụng trong AppModule
   ],
   controllers: [AppController], // Đăng ký AppController để xử lý các yêu cầu HTTP
   providers: [
@@ -35,4 +39,4 @@ import { CompaniesModule } from './companies/companies.module';
     // },
   ], // Đăng ký các provider cho AppModule
 })
-export class AppModule {} // Định nghĩa AppModule là module chính của ứng dụng
+export class AppModule { } // Định nghĩa AppModule là module chính của ứng dụng
