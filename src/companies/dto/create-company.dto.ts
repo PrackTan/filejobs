@@ -6,6 +6,8 @@ export class CreateCompanyDto {
     // The email field must be a valid email address.
     @IsNotEmpty({ message: 'Tên công ty không được để trống' })
     name: string;
+    @IsOptional()
+    logo: string;
 
 
     // The password field must not be empty and must have a minimum length of 8 characters.

@@ -16,6 +16,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/Interface/users.interface';
 // Import aqp từ api-query-params để phân tích cú pháp query.
 import aqp from 'api-query-params';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 // Sử dụng decorator Injectable để đánh dấu class này có thể được tiêm vào các class khác.
 @Injectable()
@@ -26,13 +27,21 @@ export class CompaniesService {
     @InjectModel(Company.name)
     // Khai báo companyModel là một SoftDeleteModel của CompanyDocument.
     private companyModel: SoftDeleteModel<CompanyDocument>,
+    private readonly cloudinaryService: CloudinaryService,
   ) { }
 
   // Phương thức create để tạo một công ty mới.
-  async create(createCompanyDto: CreateCompanyDto, user: any) { // interface any mới chạy được
+  async create(createCompanyDto: CreateCompanyDto, user: any, files: Express.Multer.File[]) { // interface any mới chạy được
     // Tạo một đối tượng công ty mới từ companyModel với dữ liệu từ createCompanyDto.
+    if (!files || files.length === 0) {
+      throw new Error('No files uploaded');
+    }
+
+    const fileUrls = await this.cloudinaryService.uploadFiles(files, 'company_files', 'raw');
     const company = await new this.companyModel({
-      ...createCompanyDto, createBy: {
+      ...createCompanyDto,
+      logo: fileUrls,
+      createBy: {
         _id: user._id,
         name: user.email
       }

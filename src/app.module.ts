@@ -9,7 +9,9 @@ import { softDeletePlugin } from 'soft-delete-plugin-mongoose'; // Import softDe
 import { CompaniesModule } from './companies/companies.module';
 import { JobsModule } from './jobs/jobs.module';
 import { FilesModule } from './files/files.module';
-
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CloudinaryController } from './cloudinary/cloudinary.controller';
+import { CloudinaryService } from './cloudinary/cloudinary.service';
 @Module({
   imports: [
     UserModule, // Đăng ký UserModule để sử dụng trong AppModule
@@ -28,11 +30,13 @@ import { FilesModule } from './files/files.module';
     AuthModule,
     CompaniesModule,
     JobsModule,
-    FilesModule, // Đăng ký AuthModule để sử dụng trong AppModule
+    FilesModule,
+    CloudinaryModule, // Đăng ký AuthModule để sử dụng trong AppModule
   ],
-  controllers: [AppController], // Đăng ký AppController để xử lý các yêu cầu HTTP
+  controllers: [AppController, CloudinaryController], // Đăng ký AppController để xử lý các yêu cầu HTTP
   providers: [
     AppService, // Đăng ký AppService để cung cấp các dịch vụ cho AppModule
+    CloudinaryService,
     // {
     //   provide: APP_GUARD, // Cung cấp APP_GUARD để bảo vệ các route
     //   useClass: JwtAuthGuard, // Sử dụng JwtAuthGuard để bảo vệ các route

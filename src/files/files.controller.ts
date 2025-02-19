@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UploadedFiles, UseInterceptors, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('files')
 export class FilesController {
@@ -18,6 +18,12 @@ export class FilesController {
       })
   ) file: Express.Multer.File) { // Định nghĩa kiểu của tham số file là Express.Multer.File
     console.log(file); // In thông tin file ra console
+  }
+
+  @Post('upload-multiple') // Định nghĩa một route POST với đường dẫn 'upload-multiple'
+  @UseInterceptors(FilesInterceptor('files')) // Sử dụng interceptor FilesInterceptor để xử lý nhiều file upload, 'files' là tên field sử dụng trong form-data
+  uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) { // Định nghĩa một tham số cho phương thức uploadMultipleFiles, sử dụng decorator @UploadedFiles để lấy các file được upload
+    files.forEach(file => console.log(file)); // In thông tin từng file ra console
   }
 
   @Get()
