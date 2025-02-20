@@ -2,6 +2,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 // Import ConfigService từ @nestjs/config để sử dụng trong provider
 import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 
 // Định nghĩa một provider cho Cloudinary
 export const CloudinaryProvider = {

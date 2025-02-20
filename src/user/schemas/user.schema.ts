@@ -26,6 +26,7 @@ export class User {
     company: {
         _id: string;
         name: string;
+        logo: string;
     }
     @Prop({ type: Object })
     createBy: {

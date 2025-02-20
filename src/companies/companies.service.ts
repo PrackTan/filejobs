@@ -31,16 +31,10 @@ export class CompaniesService {
   ) { }
 
   // Phương thức create để tạo một công ty mới.
-  async create(createCompanyDto: CreateCompanyDto, user: any, files: Express.Multer.File[]) { // interface any mới chạy được
+  async create(createCompanyDto: CreateCompanyDto, user: any) { // interface any mới chạy được
     // Tạo một đối tượng công ty mới từ companyModel với dữ liệu từ createCompanyDto.
-    if (!files || files.length === 0) {
-      throw new Error('No files uploaded');
-    }
-
-    const fileUrls = await this.cloudinaryService.uploadFiles(files, 'company_files', 'raw');
     const company = await new this.companyModel({
       ...createCompanyDto,
-      logo: fileUrls,
       createBy: {
         _id: user._id,
         name: user.email
@@ -106,7 +100,9 @@ export class CompaniesService {
     if (company) {
       // Cập nhật công ty với dữ liệu mới và thông tin người cập nhật.
       await company.updateOne({ _id: updateCompanyDto._id }, {
-        ...updateCompanyDto, updateBy: {
+        ...updateCompanyDto,
+
+        updateBy: {
           _id: user._id,
           name: user.email
         }

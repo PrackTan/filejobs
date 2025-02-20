@@ -12,6 +12,10 @@ import { FilesModule } from './files/files.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CloudinaryController } from './cloudinary/cloudinary.controller';
 import { CloudinaryService } from './cloudinary/cloudinary.service';
+import { ApolloDriver } from '@nestjs/apollo';
+import { ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
+import { join } from 'path';
 @Module({
   imports: [
     UserModule, // Đăng ký UserModule để sử dụng trong AppModule
@@ -33,7 +37,10 @@ import { CloudinaryService } from './cloudinary/cloudinary.service';
     FilesModule,
     CloudinaryModule, // Đăng ký AuthModule để sử dụng trong AppModule
   ],
-  controllers: [AppController, CloudinaryController], // Đăng ký AppController để xử lý các yêu cầu HTTP
+  controllers: [
+    AppController,
+    CloudinaryController
+  ], // Đăng ký AppController để xử lý các yêu cầu HTTP
   providers: [
     AppService, // Đăng ký AppService để cung cấp các dịch vụ cho AppModule
     CloudinaryService,

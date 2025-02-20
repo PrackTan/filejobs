@@ -20,6 +20,8 @@ export class CreateJobDto {
     @ValidateNested()
     @Type(() => Company)
     company: Company;
+    @IsNotEmpty({ message: 'Địa điểm không được để trống' })
+    location: string;
     @IsNotEmpty({ message: 'Mức lương không được để trống' })
     salary: number;
     @IsNotEmpty({ message: 'Số lượng tuyển dụng không được để trống' })

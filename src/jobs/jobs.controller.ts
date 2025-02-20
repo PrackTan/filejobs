@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
-import { ResponseMessage, User } from 'src/decorator/customizeDecoratior';
+import { Public, ResponseMessage, User } from 'src/decorator/customizeDecoratior';
 
 @Controller('jobs')
 export class JobsController {
@@ -12,12 +12,14 @@ export class JobsController {
   create(@Body() createJobDto: CreateJobDto, @User() user: any) {
     return this.jobsService.create(createJobDto, user);
   }
-
+  @Public()
+  @ResponseMessage('Get list jobs successfully')
   @Get()
   findAll(@Query("current") currentPage: number, @Query("pageSize") pageSize: number, @Query() qs: string) {
     return this.jobsService.findAll(currentPage, pageSize, qs);
   }
-
+  @Public()
+  @ResponseMessage('Get list jobs successfully')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.jobsService.findOne(id);

@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile } from '@nestjs/common'; // Import các decorator cần thiết từ @nestjs/common
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common'; // Import các decorator cần thiết từ @nestjs/common
 import { CompaniesService } from './companies.service'; // Import service CompaniesService để xử lý logic nghiệp vụ
 import { CreateCompanyDto } from './dto/create-company.dto'; // Import DTO để tạo công ty
 import { UpdateCompanyDto } from './dto/update-company.dto'; // Import DTO để cập nhật công ty
 import { ResponseMessage, User, Public } from 'src/decorator/customizeDecoratior'; // Import decorator User để lấy thông tin người dùng
 import { IUser } from 'src/Interface/users.interface'; // Import interface IUser để định nghĩa cấu trúc dữ liệu người dùng
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('companies') // Đánh dấu lớp này là một controller với route gốc là 'companies'
 export class CompaniesController {
@@ -14,13 +15,12 @@ export class CompaniesController {
   ) { } // Khởi tạo controller với service CompaniesService
 
   @Post() // Định nghĩa route POST để tạo công ty mới
-  async create(@Body() createCompanyDto: CreateCompanyDto, @User() user: IUser, @UploadedFile() files: Express.Multer.File[]) { // Phương thức create nhận dữ liệu từ body và thông tin người dùng
+  @UseInterceptors(FilesInterceptor('files', 10)) // Cho phép upload tối đa 10 file
+  async create(
+    @Body() createCompanyDto: CreateCompanyDto,
+    @User() user: IUser) { // Phương thức create nhận dữ liệu từ body và thông tin người dùng
     // console.log("user check>>>>>", user); // In ra thông tin người dùng để kiểm tra
-    if (!files || files.length === 0) {
-      throw new Error('No files uploaded');
-    }
-
-    return this.companiesService.create(createCompanyDto, user, files); // Gọi service để tạo công ty mới
+    return this.companiesService.create(createCompanyDto, user); // Gọi service để tạo công ty mới
   }
   @Public()
   @ResponseMessage('Lấy thông tin công ty theo page, limit ')
