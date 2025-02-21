@@ -16,6 +16,7 @@ import { ApolloDriver } from '@nestjs/apollo';
 import { ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
+import { GameModule } from './game/game.module';
 @Module({
   imports: [
     UserModule, // Đăng ký UserModule để sử dụng trong AppModule
@@ -36,6 +37,12 @@ import { join } from 'path';
     JobsModule,
     FilesModule,
     CloudinaryModule, // Đăng ký AuthModule để sử dụng trong AppModule
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      sortSchema: true,
+      playground: true,
+    }), GameModule
   ],
   controllers: [
     AppController,
