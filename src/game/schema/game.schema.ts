@@ -7,11 +7,11 @@ export type GameDocument = HydratedDocument<Game>;
 @ObjectType()
 export class Game {
   @Prop({ required: true })
-  @Field(() => String)
+  @Field(() => String, { nullable: false })
   name: string;
 
   @Prop({ required: true })
-  @Field(() => String)
+  @Field(() => String, { nullable: false })
   genre: string;
 
 

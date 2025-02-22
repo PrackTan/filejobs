@@ -5,16 +5,16 @@ import { CreateGameInput } from './dto/create-game.input';
 import { UpdateGameInput } from './dto/update-game.input';
 import { Public } from 'src/decorator/customizeDecoratior';
 
-@Resolver(() => Game)
+@Resolver()
 export class GameResolver {
   constructor(private readonly gameService: GameService) { }
-
-  // @Mutation(() => Game)
-  // createGame(@Args('createGameInput') createGameInput: CreateGameInput) {
-  //   return this.gameService.create(createGameInput);
-  // }
   @Public()
-  @Query(() => [Game], { name: 'games' })  // Change "game" to "games"
+  @Mutation(() => Game)
+  createGame(@Args('createGameInput') createGameInput: CreateGameInput) {
+    return this.gameService.create(createGameInput);
+  }
+  @Public()
+  @Query(() => [Game])  // Change "game" to "games"
   findAll() {
     return this.gameService.findAll();
   }

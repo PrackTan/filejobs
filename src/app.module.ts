@@ -1,22 +1,23 @@
-import { Module } from '@nestjs/common'; // Import Module từ thư viện @nestjs/common
-import { AppController } from './app.controller'; // Import AppController từ file app.controller
-import { AppService } from './app.service'; // Import AppService từ file app.service
-import { UserModule } from './user/user.module'; // Import UserModule từ file user.module
-import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigModule và ConfigService từ thư viện @nestjs/config
-import { MongooseModule } from '@nestjs/mongoose'; // Import MongooseModule từ thư viện @nestjs/mongoose
-import { AuthModule } from './auth/auth.module'; // Import AuthModule từ file auth.module
-import { softDeletePlugin } from 'soft-delete-plugin-mongoose'; // Import softDeletePlugin từ thư viện soft-delete-plugin-mongoose
-import { CompaniesModule } from './companies/companies.module';
-import { JobsModule } from './jobs/jobs.module';
-import { FilesModule } from './files/files.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { CloudinaryController } from './cloudinary/cloudinary.controller';
-import { CloudinaryService } from './cloudinary/cloudinary.service';
-import { ApolloDriver } from '@nestjs/apollo';
-import { ApolloDriverConfig } from '@nestjs/apollo';
-import { GraphQLModule } from '@nestjs/graphql';
-import { join } from 'path';
-import { GameModule } from './game/game.module';
+import { Module } from '@nestjs/common'; // Import Module từ thư viện @nestjs/common để định nghĩa một module trong NestJS
+import { AppController } from './app.controller'; // Import AppController từ file app.controller để xử lý các yêu cầu HTTP
+import { AppService } from './app.service'; // Import AppService từ file app.service để cung cấp các dịch vụ cho AppModule
+import { UserModule } from './user/user.module'; // Import UserModule từ file user.module để quản lý người dùng
+import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigModule và ConfigService từ thư viện @nestjs/config để quản lý cấu hình
+import { MongooseModule } from '@nestjs/mongoose'; // Import MongooseModule từ thư viện @nestjs/mongoose để kết nối với MongoDB
+import { AuthModule } from './auth/auth.module'; // Import AuthModule từ file auth.module để quản lý xác thực
+import { softDeletePlugin } from 'soft-delete-plugin-mongoose'; // Import softDeletePlugin từ thư viện soft-delete-plugin-mongoose để hỗ trợ xóa mềm
+import { CompaniesModule } from './companies/companies.module'; // Import CompaniesModule để quản lý công ty
+import { JobsModule } from './jobs/jobs.module'; // Import JobsModule để quản lý công việc
+import { FilesModule } from './files/files.module'; // Import FilesModule để quản lý tệp tin
+import { CloudinaryModule } from './cloudinary/cloudinary.module'; // Import CloudinaryModule để quản lý dịch vụ Cloudinary
+import { CloudinaryController } from './cloudinary/cloudinary.controller'; // Import CloudinaryController để xử lý các yêu cầu liên quan đến Cloudinary
+import { CloudinaryService } from './cloudinary/cloudinary.service'; // Import CloudinaryService để cung cấp các dịch vụ liên quan đến Cloudinary
+import { ApolloDriver } from '@nestjs/apollo'; // Import ApolloDriver từ @nestjs/apollo để sử dụng Apollo Server
+import { ApolloDriverConfig } from '@nestjs/apollo'; // Import ApolloDriverConfig để cấu hình Apollo Server
+import { GraphQLModule } from '@nestjs/graphql'; // Import GraphQLModule từ @nestjs/graphql để sử dụng GraphQL
+import { join } from 'path'; // Import join từ module path để xử lý đường dẫn
+import { GameModule } from './game/game.module'; // Import GameModule để quản lý trò chơi
+
 @Module({
   imports: [
     UserModule, // Đăng ký UserModule để sử dụng trong AppModule
@@ -32,29 +33,30 @@ import { GameModule } from './game/game.module';
       }),
       inject: [ConfigService], // Tiêm ConfigService vào useFactory để sử dụng
     }),
-    AuthModule,
-    CompaniesModule,
-    JobsModule,
-    FilesModule,
-    CloudinaryModule, // Đăng ký AuthModule để sử dụng trong AppModule
+    AuthModule, // Đăng ký AuthModule để sử dụng trong AppModule
+    CompaniesModule, // Đăng ký CompaniesModule để sử dụng trong AppModule
+    JobsModule, // Đăng ký JobsModule để sử dụng trong AppModule
+    FilesModule, // Đăng ký FilesModule để sử dụng trong AppModule
+    CloudinaryModule, // Đăng ký CloudinaryModule để sử dụng trong AppModule
     GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      sortSchema: true,
-      playground: true,
-    }), GameModule
+      driver: ApolloDriver, // Sử dụng ApolloDriver cho GraphQL
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // Tự động tạo file schema.gql trong thư mục src
+      sortSchema: true, // Sắp xếp schema
+      playground: true, // Bật GraphQL Playground để thử nghiệm API
+    }),
+    GameModule, // Đăng ký GameModule để sử dụng trong AppModule
   ],
   controllers: [
-    AppController,
-    CloudinaryController
-  ], // Đăng ký AppController để xử lý các yêu cầu HTTP
+    AppController, // Đăng ký AppController để xử lý các yêu cầu HTTP
+    CloudinaryController, // Đăng ký CloudinaryController để xử lý các yêu cầu liên quan đến Cloudinary
+  ],
   providers: [
     AppService, // Đăng ký AppService để cung cấp các dịch vụ cho AppModule
-    CloudinaryService,
+    CloudinaryService, // Đăng ký CloudinaryService để cung cấp các dịch vụ liên quan đến Cloudinary
     // {
     //   provide: APP_GUARD, // Cung cấp APP_GUARD để bảo vệ các route
     //   useClass: JwtAuthGuard, // Sử dụng JwtAuthGuard để bảo vệ các route
     // },
-  ], // Đăng ký các provider cho AppModule
+  ],
 })
 export class AppModule { } // Định nghĩa AppModule là module chính của ứng dụng
