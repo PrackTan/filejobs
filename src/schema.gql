@@ -2,20 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input CreateGameInput {
-  genre: String!
-  name: String!
-}
-
-type Game {
-  genre: String!
-  name: String!
-}
-
-type Mutation {
-  createGame(createGameInput: CreateGameInput!): Game!
-}
-
 type Query {
-  findAll: [Game!]!
+  hello: String!
 }

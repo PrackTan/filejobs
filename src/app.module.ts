@@ -20,7 +20,12 @@ import { GameModule } from './game/game.module'; // Import GameModule để qu�
 
 @Module({
   imports: [
-    UserModule, // Đăng ký UserModule để sử dụng trong AppModule
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver, // Sử dụng ApolloDriver cho GraphQL
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // Tự động tạo file schema.gql trong thư mục src
+      sortSchema: true, // Sắp xếp schema
+      playground: true, // Bật GraphQL Playground để thử nghiệm API
+    }),
     ConfigModule.forRoot({ isGlobal: true }), // Đăng ký ConfigModule và cấu hình nó là global để có thể sử dụng ở mọi nơi
     MongooseModule.forRootAsync({
       imports: [ConfigModule], // Đăng ký ConfigModule để sử dụng trong MongooseModule
@@ -33,18 +38,14 @@ import { GameModule } from './game/game.module'; // Import GameModule để qu�
       }),
       inject: [ConfigService], // Tiêm ConfigService vào useFactory để sử dụng
     }),
+    UserModule, // Đăng ký UserModule để sử dụng trong AppModule
     AuthModule, // Đăng ký AuthModule để sử dụng trong AppModule
     CompaniesModule, // Đăng ký CompaniesModule để sử dụng trong AppModule
     JobsModule, // Đăng ký JobsModule để sử dụng trong AppModule
     FilesModule, // Đăng ký FilesModule để sử dụng trong AppModule
     CloudinaryModule, // Đăng ký CloudinaryModule để sử dụng trong AppModule
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver, // Sử dụng ApolloDriver cho GraphQL
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // Tự động tạo file schema.gql trong thư mục src
-      sortSchema: true, // Sắp xếp schema
-      playground: true, // Bật GraphQL Playground để thử nghiệm API
-    }),
     GameModule, // Đăng ký GameModule để sử dụng trong AppModule
+
   ],
   controllers: [
     AppController, // Đăng ký AppController để xử lý các yêu cầu HTTP

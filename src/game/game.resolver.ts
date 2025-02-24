@@ -9,28 +9,8 @@ import { Public } from 'src/decorator/customizeDecoratior';
 export class GameResolver {
   constructor(private readonly gameService: GameService) { }
   @Public()
-  @Mutation(() => Game)
-  createGame(@Args('createGameInput') createGameInput: CreateGameInput) {
-    return this.gameService.create(createGameInput);
-  }
-  @Public()
-  @Query(() => [Game])  // Change "game" to "games"
-  findAll() {
+  @Query(() => String)
+  async hello() {
     return this.gameService.findAll();
   }
-
-  // @Query(() => Game, { name: 'game' })
-  // findOne(@Args('id', { type: () => Int }) id: number) {
-  //   return this.gameService.findOne(id);
-  // }
-
-  // @Mutation(() => Game)
-  // updateGame(@Args('updateGameInput') updateGameInput: UpdateGameInput) {
-  //   return this.gameService.update(updateGameInput.id, updateGameInput);
-  // }
-
-  // @Mutation(() => Game)
-  // removeGame(@Args('id', { type: () => Int }) id: number) {
-  //   return this.gameService.remove(id);
-  // }
 }

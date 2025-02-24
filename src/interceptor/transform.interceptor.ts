@@ -27,6 +27,9 @@ export class TransformInterceptor<T>
         context: ExecutionContext, // Tham số context để truy cập ngữ cảnh thực thi hiện tại
         next: CallHandler, // Tham số next để xử lý tiếp các cuộc gọi
     ): Observable<Response<T>> { // Trả về một Observable chứa đối tượng Response
+        if (context.getType<'graphql'>() === 'graphql') {
+            return next.handle(); // Trả về data gốc, không thêm statusCode/message
+        }
         // Sử dụng pipe để chuyển đổi dữ liệu response
         return next
             .handle() // Xử lý tiếp cuộc gọi và lấy dữ liệu

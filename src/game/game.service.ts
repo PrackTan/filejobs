@@ -14,25 +14,22 @@ export class GameService {
     const createdGame = new this.gameModel(createGameInput);
     const saveGame = await createdGame.save();
 
-    console.log("🔥 Dữ liệu MongoDB sau khi lưu:", saveGame); // Debug
-
-    // Nếu name bị undefined hoặc null, cần kiểm tra lại
-    if (!saveGame.name) {
-      throw new Error("❌ Dữ liệu trả về không có name, kiểm tra lại schema!");
-    }
-
     return {
+      _id: saveGame._id,
       name: saveGame.name,
       genre: saveGame.genre,
     };
   }
 
 
-  async findAll() {
-    return await this.gameModel.find();
+  async findAll(): Promise<Game[]> {
+    const games = await this.gameModel.find().exec();
+
+    return games; // Đảm bảo luôn trả về một mảng
   }
 
-  async findOne(id: string) {
+  // Tìm game theo ID từ MongoDB
+  async findOne(id: string): Promise<Game | null> {
     return await this.gameModel.findById(id);
   }
 
