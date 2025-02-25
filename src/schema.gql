@@ -2,6 +2,34 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input CreateGameInput {
+  genre: String
+  name: String
+}
+
+type Game {
+  _id: String!
+  genre: String!
+  name: String!
+}
+
+type GameResponse {
+  meta: MetaData!
+  result: [Game!]!
+}
+
+type MetaData {
+  current: Int!
+  itemsPerPage: Int!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+type Mutation {
+  createGame(createGameInput: CreateGameInput!): Game!
+}
+
 type Query {
-  hello: String!
+  findAll(current: Int!, pageSize: Int!, query: String): GameResponse!
+  findOne(id: String!): Game!
 }

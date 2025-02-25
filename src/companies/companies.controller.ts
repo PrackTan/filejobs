@@ -32,7 +32,7 @@ export class CompaniesController {
   @ResponseMessage('Lấy thông tin công ty theo id')
   @Get(':id') // Định nghĩa route GET để lấy thông tin công ty theo id
   findOne(@Param('id') id: string) { // Phương thức findOne nhận id từ param
-    return this.companiesService.findOne(+id); // Gọi service để lấy thông tin công ty theo id
+    return this.companiesService.findOne(id); // Gọi service để lấy thông tin công ty theo id
   }
 
   @Patch() // Định nghĩa route PATCH để cập nhật thông tin công ty theo id

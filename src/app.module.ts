@@ -17,6 +17,7 @@ import { ApolloDriverConfig } from '@nestjs/apollo'; // Import ApolloDriverConfi
 import { GraphQLModule } from '@nestjs/graphql'; // Import GraphQLModule từ @nestjs/graphql để sử dụng GraphQL
 import { join } from 'path'; // Import join từ module path để xử lý đường dẫn
 import { GameModule } from './game/game.module'; // Import GameModule để quản lý trò chơi
+import { ResumesModule } from './resumes/resumes.module';
 
 @Module({
   imports: [
@@ -44,7 +45,7 @@ import { GameModule } from './game/game.module'; // Import GameModule để qu�
     JobsModule, // Đăng ký JobsModule để sử dụng trong AppModule
     FilesModule, // Đăng ký FilesModule để sử dụng trong AppModule
     CloudinaryModule, // Đăng ký CloudinaryModule để sử dụng trong AppModule
-    GameModule, // Đăng ký GameModule để sử dụng trong AppModule
+    GameModule, ResumesModule, // Đăng ký GameModule để sử dụng trong AppModule
 
   ],
   controllers: [

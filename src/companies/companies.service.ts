@@ -1,5 +1,5 @@
 // Import Injectable từ @nestjs/common để đánh dấu class này có thể được tiêm vào các class khác.
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 // Import CreateCompanyDto từ thư mục dto để sử dụng cho việc tạo công ty.
 import { CreateCompanyDto } from './dto/create-company.dto';
 // Import UpdateCompanyDto từ thư mục dto để sử dụng cho việc cập nhật công ty.
@@ -84,16 +84,25 @@ export class CompaniesService {
   }
 
   // Phương thức findOne để lấy một công ty theo id.
-  findOne(id: number) {
+  async findOne(id: string) {
+    // Kiểm tra tính hợp lệ của ObjectId.
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Id không hợp lệ');
+    }
+    // Tìm công ty theo id.
+    const company = await this.companyModel.findById(id)
+    if (company) {
+      return company;
+    }
     // Trả về một chuỗi thông báo rằng hành động này trả về một công ty với id cụ thể.
-    return `This action returns a #${id} company`;
+    throw new NotFoundException('Công ty không tồn tại');
   }
 
   // Phương thức update để cập nhật một công ty theo id.
   async update(updateCompanyDto: UpdateCompanyDto, user: any) {
     // Kiểm tra tính hợp lệ của ObjectId.
     if (!mongoose.Types.ObjectId.isValid(updateCompanyDto._id)) {
-      return { statusCode: 400, message: 'Id không hợp lệ', data: null };
+      throw new BadRequestException('Id không hợp lệ');
     }
     // Tìm công ty theo id.
     const company = await this.companyModel.findById(updateCompanyDto._id)
@@ -110,7 +119,7 @@ export class CompaniesService {
       return company;
     }
     // Trả về thông báo lỗi nếu công ty không tồn tại.
-    return { statusCode: 404, message: 'Công ty không tồn tại', data: null };
+    throw new NotFoundException('Công ty không tồn tại');
   }
 
   // Phương thức remove để xóa một công ty theo id.
@@ -127,11 +136,10 @@ export class CompaniesService {
         }
       })
       // Xóa mềm công ty và trả về thông báo thành công.
-      await this.companyModel.softDelete({ _id: id });
-      return { statusCode: 200, message: 'Xóa công ty thành công', data: company };
+      return await this.companyModel.softDelete({ _id: id });
     }
     // Trả về thông báo lỗi nếu công ty không tồn tại.
-    return { statusCode: 404, message: 'Công ty không tồn tại', data: null };
+    throw new NotFoundException('Công ty không tồn tại');
 
   }
 }
