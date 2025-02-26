@@ -1,12 +1,13 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument, ObjectId } from "mongoose";
+import { ResumeStatus } from "src/enum/resume-status.enum";
 export type ResumeDocument = HydratedDocument<Resume>;
 
 /// schema no-sql 
 /// entity sql
 @Schema({ timestamps: true })
 export class Resume {
-    @Prop({ required: true })
+    @Prop()
     email: string;
     @Prop()
     userId: mongoose.Schema.Types.ObjectId;
@@ -14,8 +15,8 @@ export class Resume {
     url: string;
     @Prop()
     address: string;
-    @Prop()
-    status: string;
+    @Prop({ type: String, enum: ResumeStatus, default: ResumeStatus.PENDING })
+    status: ResumeStatus;
     @Prop()
     companyId: mongoose.Schema.Types.ObjectId;
     @Prop()
@@ -48,9 +49,9 @@ export class Resume {
         name: string;
     }
     @Prop()
-    createAt: Date;
+    createdAt: Date;
     @Prop()
-    updateAt: Date;
+    updatedAt: Date;
     @Prop()
     isDeleted: boolean;
     @Prop()

@@ -27,7 +27,7 @@ async function bootstrap() {
 
   // Kích hoạt CORS với các cấu hình cụ thể
   app.enableCors({
-    origin: true, // Chỉ định nguồn gốc được phép truy cập, ở đây là localhost:3000
+    origin: process.env.ORIGIN, // Chỉ định nguồn gốc được phép truy cập, ở đây là localhost:3000
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Chỉ định các phương thức HTTP được phép
     credentials: true, // Cho phép gửi thông tin xác thực như cookies trong các request
     allowedHeaders: ['Content-Type', 'Authorization'], // Chỉ định các header được phép trong request

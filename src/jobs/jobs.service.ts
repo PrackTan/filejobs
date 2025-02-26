@@ -67,6 +67,10 @@ export class JobsService {
   }
 
   async update(_id: string, updateJobDto: UpdateJobDto, user: any) {
+    const job = await this.jobModel.findById(_id);
+    if (!job) {
+      throw new NotFoundException('Không tìm thấy công việc');
+    }
     const update = await this.jobModel.updateOne({ _id }, {
       ...updateJobDto,
       updateBy: {
