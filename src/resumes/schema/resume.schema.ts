@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument, ObjectId } from "mongoose";
 import { ResumeStatus } from "src/enum/resume-status.enum";
+import { Company } from "src/companies/schema/company.schema";
+import { Job } from "src/jobs/schema/job.schema";
 export type ResumeDocument = HydratedDocument<Resume>;
 
 /// schema no-sql 
@@ -17,9 +19,9 @@ export class Resume {
     address: string;
     @Prop({ type: String, enum: ResumeStatus, default: ResumeStatus.PENDING })
     status: ResumeStatus;
-    @Prop()
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Company.name })
     companyId: mongoose.Schema.Types.ObjectId;
-    @Prop()
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Job.name })
     jobId: mongoose.Schema.Types.ObjectId;
     // Định nghĩa một thuộc tính history là một mảng các đối tượng
     @Prop({ type: mongoose.Schema.Types.Array })
@@ -47,6 +49,7 @@ export class Resume {
     updatedBy: {
         _id: mongoose.Schema.Types.ObjectId;
         name: string;
+        email: string;
     }
     @Prop()
     createdAt: Date;

@@ -74,7 +74,10 @@ export class ResumesService {
     }
     return resume; // Trả về resume tìm thấy
   }
-
+  async findByUsers(user: any) {
+    const resume = await this.resumeModel.find({ userId: user._id });
+    return resume;
+  }
   // Hàm cập nhật trạng thái của một resume
   async update(id: string, status: ResumeStatus, user: any) {
     const resume = await this.resumeModel.findById(id);
@@ -82,28 +85,41 @@ export class ResumesService {
       throw new NotFoundException('Resume not found'); // Ném lỗi nếu không tìm thấy resume
     }
     // Cập nhật trạng thái và lịch sử cập nhật của resume
-    const update = await this.resumeModel.updateOne({ _id: id }, {
-      status,
-      updatedBy: {
-        _id: user._id,
-        name: user.email
-      },
-      $push: {
-        history: {
-          status,
-          updatedAt: new Date(),
-          updatedBy: {
-            _id: user._id,
-            name: user.email
+    const update = await this.resumeModel.updateOne({ _id: id },
+      {
+        status,
+        updatedBy: {
+          _id: user._id,
+          name: user.email
+        },
+        // Thêm một phần tử vào mảng history của resume
+        $push: {
+          history: {
+            status, // Trạng thái mới của resume
+            updatedAt: new Date(), // Thời gian cập nhật
+            updatedBy: {
+              _id: user._id, // ID của người cập nhật
+              name: user.email // Email của người cập nhật
+            }
           }
         }
-      }
-    });
+      });
     return update; // Trả về kết quả cập nhật
   }
 
   // Hàm xóa một resume theo ID
-  remove(id: number) {
-    return `This action removes a #${id} resume`; // Trả về thông báo xóa
+  async remove(id: string, user: any) {
+    const resume = await this.resumeModel.findById(id);
+    if (!resume) {
+      throw new NotFoundException('Resume not found'); // Ném lỗi nếu không tìm thấy resume
+    }
+    await this.resumeModel.updateOne({ _id: id }, {
+      deletedBy: {
+        _id: user._id,
+        name: user.email,
+        email: user.email
+      }
+    });
+    return await this.resumeModel.softDelete({ _id: id });
   }
 }

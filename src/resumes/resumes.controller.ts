@@ -25,7 +25,11 @@ export class ResumesController {
   findOne(@Param('id') id: string) {
     return this.resumesService.findOne(id);
   }
-
+  @Post("by-user")
+  @ResponseMessage('Get resume successfully')
+  getResume(@User() user: any) {
+    return this.resumesService.findByUsers(user);
+  }
   @ResponseMessage('Update resume successfully')
   @Patch(':id')
   update(@Param('id') id: string, @Body('status') status: ResumeStatus, @User() user: any) {
@@ -34,7 +38,7 @@ export class ResumesController {
 
   @ResponseMessage('Delete resume successfully')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.resumesService.remove(+id);
+  remove(@Param('id') id: string, @User() user: any) {
+    return this.resumesService.remove(id, user);
   }
 }

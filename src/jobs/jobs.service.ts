@@ -3,7 +3,6 @@ import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Job, JobDocument } from './schema/job.schema';
-import { Model } from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 
@@ -85,11 +84,19 @@ export class JobsService {
 
   }
 
-  async remove(_id: string) {
-    const remove = await this.jobModel.softDelete({ _id });
-    if (!remove) {
+  async remove(_id: string, user: any) {
+
+    const job = await this.jobModel.findById(_id);
+    if (!job) {
       throw new NotFoundException('Không tìm thấy công việc');
     }
-    return { deleted: true };
+    await this.jobModel.updateOne({ _id }, {
+      deletedBy: {
+        _id: user._id,
+        name: user.email,
+        email: user.email
+      }
+    });
+    return await this.jobModel.softDelete({ _id });
   }
 }
