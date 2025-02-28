@@ -15,8 +15,8 @@ export class JobsController {
   @Public()
   @ResponseMessage('Get list jobs successfully')
   @Get()
-  findAll(@Query("current") currentPage: number, @Query("pageSize") pageSize: number, @Query() qs: string) {
-    return this.jobsService.findAll(currentPage, pageSize, qs);
+  findAll(@Query("current") currentPage: string, @Query("pageSize") limit: string, @Query() query: string) {
+    return this.jobsService.findAll(currentPage, limit, query);
   }
   @Public()
   @ResponseMessage('Get list jobs successfully')

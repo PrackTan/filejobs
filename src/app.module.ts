@@ -18,6 +18,8 @@ import { GraphQLModule } from '@nestjs/graphql'; // Import GraphQLModule từ @n
 import { join } from 'path'; // Import join từ module path để xử lý đường dẫn
 import { GameModule } from './game/game.module'; // Import GameModule để quản lý trò chơi
 import { ResumesModule } from './resumes/resumes.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -45,7 +47,7 @@ import { ResumesModule } from './resumes/resumes.module';
     JobsModule, // Đăng ký JobsModule để sử dụng trong AppModule
     FilesModule, // Đăng ký FilesModule để sử dụng trong AppModule
     CloudinaryModule, // Đăng ký CloudinaryModule để sử dụng trong AppModule
-    GameModule, ResumesModule, // Đăng ký GameModule để sử dụng trong AppModule
+    GameModule, ResumesModule, PermissionsModule, RolesModule, // Đăng ký GameModule để sử dụng trong AppModule
 
   ],
   controllers: [

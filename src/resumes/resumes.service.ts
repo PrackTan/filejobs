@@ -40,12 +40,12 @@ export class ResumesService {
   }
 
   // Hàm tìm kiếm tất cả các resume với phân trang và lọc
-  async findAll(query: string, currentPage: number, pageSize: number) {
+  async findAll(currentPage: string, limit: string, query: string) {
     const { filter, sort, projection, population } = aqp(query);
     delete filter.current;
     delete filter.pageSize;
-    let offset = (currentPage - 1) * (+pageSize);
-    let defaultLimit = +pageSize ? +pageSize : 10;
+    let offset = (+currentPage - 1) * (+limit);
+    let defaultLimit = +limit ? +limit : 10;
     const totalItems = await this.resumeModel.countDocuments(filter);
     const totalPages = Math.ceil(totalItems / defaultLimit);
     const result = await this.resumeModel.find(filter)
@@ -57,8 +57,8 @@ export class ResumesService {
     // Trả về thông tin phân trang và kết quả tìm kiếm
     return {
       meta: {
-        current: currentPage,
-        itemsPerPage: defaultLimit,
+        current: +currentPage,
+        pageSize: +limit,
         totalItems,
         totalPages
       },
@@ -75,8 +75,20 @@ export class ResumesService {
     return resume; // Trả về resume tìm thấy
   }
   async findByUsers(user: any) {
-    const resume = await this.resumeModel.find({ userId: user._id });
-    return resume;
+    return await this.resumeModel.find({ userId: user._id }).sort({ createdAt: -1 }).populate([{
+      path: 'jobId',
+      select: {
+        _id: 1,
+        name: 1,
+      },
+    }, {
+      path: 'companyId',
+      select: {
+        _id: 1,
+        name: 1,
+      },
+    }]);
+
   }
   // Hàm cập nhật trạng thái của một resume
   async update(id: string, status: ResumeStatus, user: any) {

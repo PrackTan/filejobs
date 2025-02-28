@@ -1,33 +1,22 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
-export type UserDocument = HydratedDocument<User>;
+import { ObjectType } from "@nestjs/graphql";
+export type PermissionDocument = HydratedDocument<Permission>;
 
 /// schema no-sql 
 /// entity sql
 @Schema({ timestamps: true })
-export class User {
+@ObjectType()
+export class Permission {
+
     @Prop({ required: true })
     name: string;
-    @Prop({ required: true })
-    email: string;
-    @Prop({ required: true })
-    password: string;
     @Prop()
-    address: string;
+    apiPath: string;
     @Prop()
-    phone: string;
+    module: string;
     @Prop()
-    avatar: string;
-    @Prop()
-    gender: string;
-    @Prop()
-    role: mongoose.Types.ObjectId;
-    @Prop({ type: Object })
-    company: {
-        _id: string;
-        name: string;
-        logo: string;
-    }
+    method: string;
     @Prop({ type: Object })
     createBy: {
         _id: string;
@@ -44,8 +33,6 @@ export class User {
         name: string;
     };
     @Prop()
-    refreshToken: string;
-    @Prop()
     createdAt: Date;
     @Prop()
     updatedAt: Date;
@@ -54,8 +41,6 @@ export class User {
     @Prop()
     deletedAt: Date;
 
-
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
-// UserSchema.plugin(softDeletePlugin); // Kích hoạt soft-delete plugin
+export const PermissionSchema = SchemaFactory.createForClass(Permission);
