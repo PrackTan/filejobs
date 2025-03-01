@@ -37,6 +37,7 @@ export class CreateUserDto {
     @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
     phone: string;
 
+    @IsNotEmpty({ message: 'Vai trò không được để trống' })
     role: string;
 
     @IsNotEmptyObject()

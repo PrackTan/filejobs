@@ -102,16 +102,15 @@ export class UserService {
     if (!mongoose.Types.ObjectId.isValid(id)) { // Kiểm tra id có hợp lệ không
       throw new HttpException('Id không hợp lệ', HttpStatus.BAD_REQUEST); // Ném lỗi nếu id không hợp lệ
     }
-    const user = await this.userModel.findById(id); // Tìm người dùng theo id
+    const user = await this.userModel.findById(id).select('-password').populate({ path: 'role', select: { name: 1, _id: 1 } }); // Tìm người dùng theo id
     if (!user) {
       throw new HttpException('Không tìm thấy người dùng', HttpStatus.NOT_FOUND); // Ném lỗi nếu không tìm thấy người dùng
     }
-    const { password, ...userWithoutPassword } = user.toObject(); // Loại bỏ password khỏi kết quả
-    return userWithoutPassword; // Trả về người dùng nếu tìm thấy
+    return user; // Trả về người dùng nếu tìm thấy
   }
 
   async findOneByEmail(email: string) { // Phương thức tìm một người dùng theo email
-    const user = await this.userModel.findOne({ email: email }); // Tìm người dùng theo email
+    const user = await this.userModel.findOne({ email: email }).populate({ path: 'role', select: { name: 1, permission: 1 } }); // Tìm người dùng theo email
     if (!user) {
       return null; // Trả về null nếu không tìm thấy người dùng
     }
@@ -145,7 +144,11 @@ export class UserService {
       throw new HttpException('Id không đúng định dạng', HttpStatus.BAD_REQUEST); // Ném lỗi nếu id không hợp lệ
     }
     const user = await this.userModel.findOne({ _id: id });
+    console.log("user", user);
     if (user) {
+      if (user.role.toString() == "ADMIN") {
+        throw new HttpException('Không thể xóa tài khoản admin', HttpStatus.BAD_REQUEST);
+      }
       await this.userModel.updateOne({ _id: id }, {
         deleteBy: {
           _id: iuser._id,

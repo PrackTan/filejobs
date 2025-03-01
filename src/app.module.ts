@@ -20,6 +20,7 @@ import { GameModule } from './game/game.module'; // Import GameModule để qu�
 import { ResumesModule } from './resumes/resumes.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { RolesModule } from './roles/roles.module';
+import { DataModule } from './data/data.module';
 
 @Module({
   imports: [
@@ -47,7 +48,7 @@ import { RolesModule } from './roles/roles.module';
     JobsModule, // Đăng ký JobsModule để sử dụng trong AppModule
     FilesModule, // Đăng ký FilesModule để sử dụng trong AppModule
     CloudinaryModule, // Đăng ký CloudinaryModule để sử dụng trong AppModule
-    GameModule, ResumesModule, PermissionsModule, RolesModule, // Đăng ký GameModule để sử dụng trong AppModule
+    GameModule, ResumesModule, PermissionsModule, RolesModule, DataModule, // Đăng ký GameModule để sử dụng trong AppModule
 
   ],
   controllers: [

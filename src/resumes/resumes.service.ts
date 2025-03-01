@@ -75,19 +75,22 @@ export class ResumesService {
     return resume; // Trả về resume tìm thấy
   }
   async findByUsers(user: any) {
-    return await this.resumeModel.find({ userId: user._id }).sort({ createdAt: -1 }).populate([{
-      path: 'jobId',
-      select: {
-        _id: 1,
-        name: 1,
-      },
-    }, {
-      path: 'companyId',
-      select: {
-        _id: 1,
-        name: 1,
-      },
-    }]);
+    return await this.resumeModel
+      .find({ userId: user._id })
+      .sort("-createdAt")
+      .populate([{
+        path: 'jobId',
+        select: {
+          _id: 1,
+          name: 1,
+        },
+      }, {
+        path: 'companyId',
+        select: {
+          _id: 1,
+          name: 1,
+        },
+      }]);
 
   }
   // Hàm cập nhật trạng thái của một resume

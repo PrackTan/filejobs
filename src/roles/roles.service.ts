@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -88,6 +88,9 @@ export class RolesService {
     const role = await this.roleModel.findById(id);
     if (!role) {
       throw new NotFoundException('Vai trò không tồn tại');
+    }
+    if (role.name == "ADMIN") {
+      throw new HttpException('Không thể xóa vai trò admin', HttpStatus.BAD_REQUEST);
     }
     return await this.roleModel.softDelete({ _id: id });
   }

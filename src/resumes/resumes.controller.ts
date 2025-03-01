@@ -26,7 +26,7 @@ export class ResumesController {
     return this.resumesService.findOne(id);
   }
   @Post("by-user")
-  @ResponseMessage('Get resume successfully')
+  @ResponseMessage('Get resume by user successfully')
   getResume(@User() user: any) {
     return this.resumesService.findByUsers(user);
   }
