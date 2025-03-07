@@ -4,13 +4,14 @@ import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { ResponseMessage, User } from 'src/decorator/customizeDecoratior';
 import { Public } from 'src/decorator/customizeDecoratior';
+
 @Controller('permissions')
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) { }
-  @Public()
   @ResponseMessage('Create a new permission')
   @Post()
   create(@Body() createPermissionDto: CreatePermissionDto, @User() user: any) {
+    console.log("check user", user);
     return this.permissionsService.create(createPermissionDto, user);
   }
 

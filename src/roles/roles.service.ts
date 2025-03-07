@@ -12,7 +12,7 @@ export class RolesService {
     @InjectModel(Roles.name) private roleModel: SoftDeleteModel<RolesDocument>,
   ) { }
   async create(createRoleDto: CreateRoleDto, user: any) {
-    const { name, description, permissions } = createRoleDto;
+    const { name, description, permissions, isActive } = createRoleDto;
     const nameExist = await this.roleModel.findOne({ name });
     if (nameExist) {
       throw new BadRequestException('Tên vai trò đã tồn tại');
@@ -21,6 +21,7 @@ export class RolesService {
       name,
       description,
       permissions,
+      isActive,
       createBy: {
         _id: user._id,
         name: user.name,
@@ -35,7 +36,7 @@ export class RolesService {
     delete filter.pageSize;
     let offset = (+currentPage - 1) * (+limit);
     let defaultLimit = +limit ? +limit : 10;
-    const totalItems = await this.roleModel.countDocuments(filter);
+    const totalItems = await this.roleModel.find(filter).countDocuments();
     const totalPages = Math.ceil(totalItems / defaultLimit);
     const result = await this.roleModel.find(filter)
       .skip(offset)
@@ -55,15 +56,16 @@ export class RolesService {
   }
 
   async findOne(id: string) {
-    const role = await this.roleModel.findById(id).populate({
-      path: 'permissions',
-      select: {
-        _id: 1,
-        name: 1,
-        description: 1,
-        module: 1,
-      },
-    });
+    const role = await this.roleModel.findById(id)
+      .populate({
+        path: 'permissions',
+        select: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          module: 1,
+        },
+      });
     if (!role) {
       throw new NotFoundException('Vai trò không tồn tại');
     }

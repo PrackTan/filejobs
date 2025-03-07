@@ -12,6 +12,7 @@ export class PermissionsService {
     @InjectModel(Permission.name) private permissionModel: SoftDeleteModel<PermissionDocument>,
   ) { }
   async create(createPermissionDto: CreatePermissionDto, user: any) {
+    console.log("check user", user);
     const apiPath = await this.permissionModel.findOne({
       apiPath: createPermissionDto.apiPath,
       method: createPermissionDto.method,

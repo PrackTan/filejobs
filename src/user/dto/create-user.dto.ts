@@ -38,7 +38,7 @@ export class CreateUserDto {
     phone: string;
 
     @IsNotEmpty({ message: 'Vai trò không được để trống' })
-    role: string;
+    role: mongoose.Schema.Types.ObjectId;
 
     @IsNotEmptyObject()
     @IsObject()

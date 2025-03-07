@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
 import { Roles } from "src/roles/schema/role.schema";
+import { IsMongoId } from "class-validator";
 export type UserDocument = HydratedDocument<User>;
 
 /// schema no-sql 
@@ -21,8 +22,9 @@ export class User {
     avatar: string;
     @Prop()
     gender: string;
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Role' })
-    role: Roles;
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Roles.name })
+    @IsMongoId({ message: 'Role không hợp lệ' })
+    role: mongoose.Schema.Types.ObjectId;
     @Prop({ type: Object })
     company: {
         _id: string;

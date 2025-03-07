@@ -8,11 +8,13 @@ import * as bcrypt from 'bcryptjs'; // Import thư viện bcryptjs để mã hó
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import { IUser } from 'src/Interface/users.interface';
+import { Roles, RolesDocument } from 'src/roles/schema/role.schema';
 
 @Injectable() // Đánh dấu class này có thể được tiêm vào các class khác
 export class UserService {
   constructor(
-    @InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>
+    @InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>,
+    @InjectModel(Roles.name) private roleModel: SoftDeleteModel<RolesDocument>
   ) { } // Tiêm mô hình User vào constructor
 
   hashPassword = (plainPassword: string) => { // Hàm mã hóa mật khẩu
@@ -25,6 +27,7 @@ export class UserService {
     if (checkEmail) {
       throw new HttpException('Email đã tồn tại', HttpStatus.CONFLICT); // Ném lỗi nếu email đã tồn tại
     }
+    const userRole = await this.roleModel.findOne({ name: "USER" });
     const hashedPassword = this.hashPassword(registerUserDto?.password); // Mã hóa mật khẩu
     try {
       let user = await this.userModel.create({ // Tạo người dùng mới
@@ -38,7 +41,8 @@ export class UserService {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-      return { id: user._id, createdAt: user.createdAt }; // Trả về id người dùng mới tạo và ngày tạo
+      return user;
+      // return { id: user._id, createdAt: user.createdAt }; // Trả về id người dùng mới tạo và ngày tạo
     } catch (error) {
       throw new HttpException('Lỗi khi tạo người dùng', HttpStatus.INTERNAL_SERVER_ERROR); // Ném lỗi nếu có lỗi xảy ra
     }
@@ -102,7 +106,9 @@ export class UserService {
     if (!mongoose.Types.ObjectId.isValid(id)) { // Kiểm tra id có hợp lệ không
       throw new HttpException('Id không hợp lệ', HttpStatus.BAD_REQUEST); // Ném lỗi nếu id không hợp lệ
     }
-    const user = await this.userModel.findById(id).select('-password').populate({ path: 'role', select: { name: 1, _id: 1 } }); // Tìm người dùng theo id
+    const user = await this.userModel.findById(id)
+      .select('-password')
+      .populate({ path: 'role', select: { name: 1, _id: 1 } }); // Tìm người dùng theo id
     if (!user) {
       throw new HttpException('Không tìm thấy người dùng', HttpStatus.NOT_FOUND); // Ném lỗi nếu không tìm thấy người dùng
     }
@@ -144,7 +150,7 @@ export class UserService {
       throw new HttpException('Id không đúng định dạng', HttpStatus.BAD_REQUEST); // Ném lỗi nếu id không hợp lệ
     }
     const user = await this.userModel.findOne({ _id: id });
-    console.log("user", user);
+    // console.log("user", user);
     if (user) {
       if (user.role.toString() == "ADMIN") {
         throw new HttpException('Không thể xóa tài khoản admin', HttpStatus.BAD_REQUEST);

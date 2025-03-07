@@ -46,7 +46,7 @@ export class ResumesService {
     delete filter.pageSize;
     let offset = (+currentPage - 1) * (+limit);
     let defaultLimit = +limit ? +limit : 10;
-    const totalItems = await this.resumeModel.countDocuments(filter);
+    const totalItems = await this.resumeModel.find(filter).countDocuments();
     const totalPages = Math.ceil(totalItems / defaultLimit);
     const result = await this.resumeModel.find(filter)
       .skip(offset)
@@ -77,7 +77,7 @@ export class ResumesService {
   async findByUsers(user: any) {
     return await this.resumeModel
       .find({ userId: user._id })
-      .sort("-createdAt")
+      .sort("- ")
       .populate([{
         path: 'jobId',
         select: {
